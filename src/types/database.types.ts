@@ -505,6 +505,49 @@ export interface Database {
         Update: never;
       };
 
+      lives: {
+        Row: {
+          id: string;
+          titulo: string;
+          descricao: string | null;
+          data_inicio: string;
+          duracao_min: number;
+          url_acesso: string | null;
+          url_gravacao: string | null;
+          thumbnail_url: string | null;
+          status: "agendada" | "ao_vivo" | "encerrada";
+          plano_minimo: "essencial" | "consultoria" | null;
+          publicado: boolean;
+          criado_em: string;
+          atualizado_em: string;
+        };
+        Insert: {
+          id?: string;
+          titulo: string;
+          descricao?: string | null;
+          data_inicio: string;
+          duracao_min?: number;
+          url_acesso?: string | null;
+          url_gravacao?: string | null;
+          thumbnail_url?: string | null;
+          status?: "agendada" | "ao_vivo" | "encerrada";
+          plano_minimo?: "essencial" | "consultoria" | null;
+          publicado?: boolean;
+        };
+        Update: {
+          titulo?: string;
+          descricao?: string | null;
+          data_inicio?: string;
+          duracao_min?: number;
+          url_acesso?: string | null;
+          url_gravacao?: string | null;
+          thumbnail_url?: string | null;
+          status?: "agendada" | "ao_vivo" | "encerrada";
+          plano_minimo?: "essencial" | "consultoria" | null;
+          publicado?: boolean;
+        };
+      };
+
       parcerias: {
         Row: {
           id: string;
