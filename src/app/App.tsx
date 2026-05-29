@@ -1,5 +1,54 @@
 import { useState, useEffect, useRef, ElementType } from "react";
 import { ObyAvatar } from "./components/Oby";
+import { useAuth as useAuthContext } from "../contexts/AuthContext";
+
+// ─── BRAND MARK (símbolo oficial "Pesquisa passo a passo") ─────────────────
+function BrandMark({ className = "w-7 h-7" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 666.18 666.15" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M666.18,0v444.63h-221.52v-223.11h-223.11V89.56C221.54,40.1,261.64,0,311.1,0h355.07Z" fill="#6578c4"/>
+      <path d="M444.66,444.63v131.96c0,49.46-40.1,89.56-89.56,89.56H.02s-.02-.01-.02-.02V221.52h221.54v223.11h223.11Z" fill="#6578c4"/>
+      <rect x="221.54" y="221.52" width="223.11" height="223.11" fill="#0a0a3a"/>
+    </svg>
+  );
+}
+function BrandMarkLight({ className = "w-7 h-7" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 666.18 666.15" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M666.18,0v444.63h-221.52v-223.11h-223.11V89.56C221.54,40.1,261.64,0,311.1,0h355.07Z" fill="#f9f3dd"/>
+      <path d="M444.66,444.63v131.96c0,49.46-40.1,89.56-89.56,89.56H.02s-.02-.01-.02-.02V221.52h221.54v223.11h223.11Z" fill="#f9f3dd"/>
+      <rect x="221.54" y="221.52" width="223.11" height="223.11" fill="#0a0a3a"/>
+    </svg>
+  );
+}
+function BrandSearchIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 687.48 658.51" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M524.25,446.34l-2.43-1.95c19.13-28.41,33.42-60.76,41.44-96.17C598.07,194.64,501.79,41.93,348.22,7.12,194.64-27.7,41.93,68.58,7.11,222.15c-34.8,153.58,61.48,306.29,215.05,341.11,81.11,18.38,161.97.2,225.37-43.67.33-.23.66-.46.98-.69l2.1,1.69,171.74,137.93,65.13-81.09-163.23-131.08ZM240.1,484.09c-109.86-24.9-178.72-134.14-153.83-244,24.9-109.85,134.14-178.72,243.99-153.81,109.85,24.9,178.72,134.14,153.83,243.98-5.29,23.35-14.4,44.86-26.53,64-19.23,30.41-46.07,54.88-77.27,71.34-41.53,21.92-90.8,29.69-140.2,18.5Z" fill="currentColor"/>
+      <circle cx="285.18" cy="285.19" r="62.76" fill="currentColor"/>
+    </svg>
+  );
+}
+function MentoriaSymbol({ className = "w-8 h-8" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 461 678" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M298.17,195.24h124.62c20.89,0,37.85,16.96,37.85,37.85v445.16h-200.32V233.09c0-20.89,16.96-37.85,37.85-37.85Z" fill="#6578c4"/>
+      <path d="M37.85,345.73h124.62c20.89,0,37.85,16.96,37.85,37.85v294.66H0v-294.66c0-20.89,16.96-37.85,37.85-37.85Z" fill="#0a0a3a"/>
+      <circle cx="97.62" cy="227.78" r="81.35" fill="#6578c4"/>
+      <circle cx="357.93" cy="81.35" r="81.35" fill="#0a0a3a"/>
+    </svg>
+  );
+}
+function WorkshopSymbol({ className = "w-8 h-8" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 603 603" className={className} xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="2.73" width="272.98" height="272.98" fill="#0a0a3a"/>
+      <rect x="0" y="329.41" width="272.98" height="272.98" fill="#0a0a3a"/>
+      <rect x="324.67" y="329.41" width="272.98" height="272.98" fill="#0a0a3a"/>
+      <circle cx="465.26" cy="137.85" r="137.85" fill="#6578c4"/>
+    </svg>
+  );
+}
 import {
   BookOpen,
   Award,
@@ -95,6 +144,21 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import { useSupabaseQuery } from "../hooks/useSupabaseQuery";
+import * as gptsApi from "../lib/api/gpts";
+import * as promptsApi from "../lib/api/prompts";
+import * as atendimentoApi from "../lib/api/atendimento";
+import * as parceriasApi from "../lib/api/parcerias";
+import * as comunidadeApi from "../lib/api/comunidade";
+import * as adminApi from "../lib/api/admin";
+import * as perfilApi from "../lib/api/perfil";
+import * as certificadosApi from "../lib/api/certificados";
+import * as cursosApi from "../lib/api/cursos";
+import * as storageApi from "../lib/api/storage";
+import * as assinaturasApi from "../lib/api/assinaturas";
+import * as livrosApi from "../lib/api/livros";
+import { notifyAdmin } from "../lib/api/notifications";
+import { StripeCheckout } from "./components/StripeCheckout";
 
 // ─── DATA ──────────────────────────────────────────────────────────────────
 
@@ -391,6 +455,33 @@ const modulosPadrao = (tema: string): Modulo[] => [
     ],
   },
 ];
+
+// Aplica blur uniforme no layout quando um modal está aberto
+function useModalBlur(isOpen: boolean) {
+  useEffect(() => {
+    const el = document.getElementById("app-layout");
+    if (!el) return;
+    if (isOpen) {
+      el.classList.add("modal-blurred");
+    } else {
+      el.classList.remove("modal-blurred");
+    }
+    return () => el.classList.remove("modal-blurred");
+  }, [isOpen]);
+}
+
+// Parse "mm:ss" or "hh:mm" to total minutes
+function parseDuracao(d: string): number {
+  const parts = d.split(":").map(Number);
+  if (parts.length === 2) return parts[0] + parts[1] / 60;
+  return 0;
+}
+function calcDuracaoTotal(modulos: Modulo[]): string {
+  const totalMin = modulos.reduce((acc, m) => acc + m.aulas.reduce((a2, a) => a2 + parseDuracao(a.duracao), 0), 0);
+  const h = Math.floor(totalMin / 60);
+  const m = Math.round(totalMin % 60);
+  return h > 0 ? `${h}h ${m > 0 ? m + "min" : ""}`.trim() : `${m}min`;
+}
 
 const trilhaCourses: Record<string, Curso[]> = {
   Estatística: [
@@ -1120,7 +1211,7 @@ const promptsCategorias = ["Todos", "Escrita", "Análise", "Metodologia", "Submi
 
 const canaisComunidade = [
   { id: "geral", nome: "Geral", icon: Hash, cor: "text-slate-600" },
-  { id: "duvidas", nome: "Dúvidas Metodológicas", icon: MessageSquare, cor: "text-blue-600" },
+  { id: "duvidas", nome: "Dúvidas Metodológicas", icon: MessageSquare, cor: "text-[#6578c4]" },
   { id: "analises", nome: "Análises & Estatística", icon: BarChart2, cor: "text-emerald-600" },
   { id: "escrita", nome: "Escrita Científica", icon: BookOpen, cor: "text-rose-600" },
   { id: "vagas", nome: "Vagas & Oportunidades", icon: Rocket, cor: "text-amber-600" },
@@ -1235,16 +1326,16 @@ const eventosProximos = [
 // ─── DATA: ADMIN ──────────────────────────────────────────────────────────
 
 const assinaturasData = [
-  { id: 1, nome: "Sandro Alves de Medeiros", email: "sandro@ufrgs.br", plano: "Premium", status: "Ativo", inicio: "Jan 2025", valor: 297 },
-  { id: 2, nome: "Samara Ernandes Adamczuk", email: "samara@usp.br", plano: "Pro", status: "Ativo", inicio: "Fev 2025", valor: 197 },
-  { id: 3, nome: "Vinicius Ilha de Arruda", email: "vinicius@ufpr.br", plano: "Premium", status: "Ativo", inicio: "Jan 2025", valor: 297 },
-  { id: 4, nome: "Ana Carolina Fernandes", email: "ana@fiocruz.br", plano: "Pro", status: "Ativo", inicio: "Mar 2025", valor: 197 },
-  { id: 5, nome: "Ricardo Monteiro Santos", email: "ricardo@ufmg.br", plano: "Pro", status: "Ativo", inicio: "Abr 2025", valor: 197 },
-  { id: 6, nome: "Patricia Lima Oliveira", email: "patricia@unb.br", plano: "Premium", status: "Pausado", inicio: "Nov 2024", valor: 297 },
-  { id: 7, nome: "Marcos Paulo Almeida", email: "marcos@unicamp.br", plano: "Pro", status: "Ativo", inicio: "Mai 2025", valor: 197 },
-  { id: 8, nome: "Juliana Costa Ribeiro", email: "juliana@puc.br", plano: "Premium", status: "Ativo", inicio: "Jan 2025", valor: 297 },
-  { id: 9, nome: "Bruno Ferreira Nunes", email: "bruno@ufsc.br", plano: "Pro", status: "Ativo", inicio: "Mar 2025", valor: 197 },
-  { id: 10, nome: "Camila Souza Borges", email: "camila@ufba.br", plano: "Premium", status: "Cancelado", inicio: "Out 2024", valor: 297 },
+  { id: 1, nome: "Sandro Alves de Medeiros", email: "sandro@ufrgs.br", plano: "Consultoria", status: "Ativo", inicio: "Jan 2025", valor: 197 },
+  { id: 2, nome: "Samara Ernandes Adamczuk", email: "samara@usp.br", plano: "Essencial", status: "Ativo", inicio: "Fev 2025", valor: 97 },
+  { id: 3, nome: "Vinicius Ilha de Arruda", email: "vinicius@ufpr.br", plano: "Consultoria", status: "Ativo", inicio: "Jan 2025", valor: 197 },
+  { id: 4, nome: "Ana Carolina Fernandes", email: "ana@fiocruz.br", plano: "Essencial", status: "Ativo", inicio: "Mar 2025", valor: 97 },
+  { id: 5, nome: "Ricardo Monteiro Santos", email: "ricardo@ufmg.br", plano: "Essencial", status: "Ativo", inicio: "Abr 2025", valor: 97 },
+  { id: 6, nome: "Patricia Lima Oliveira", email: "patricia@unb.br", plano: "Consultoria", status: "Pausado", inicio: "Nov 2024", valor: 197 },
+  { id: 7, nome: "Marcos Paulo Almeida", email: "marcos@unicamp.br", plano: "Essencial", status: "Ativo", inicio: "Mai 2025", valor: 97 },
+  { id: 8, nome: "Juliana Costa Ribeiro", email: "juliana@puc.br", plano: "Consultoria", status: "Ativo", inicio: "Jan 2025", valor: 197 },
+  { id: 9, nome: "Bruno Ferreira Nunes", email: "bruno@ufsc.br", plano: "Essencial", status: "Ativo", inicio: "Mar 2025", valor: 97 },
+  { id: 10, nome: "Camila Souza Borges", email: "camila@ufba.br", plano: "Consultoria", status: "Cancelado", inicio: "Out 2024", valor: 197 },
 ];
 
 const receitaData = [
@@ -1266,9 +1357,9 @@ const acessosData = [
 ];
 
 const distribuicaoPlanos = [
-  { name: "Premium", value: 58, color: "#1e3a5f" },
-  { name: "Pro", value: 35, color: "#2563eb" },
-  { name: "Institucional", value: 7, color: "#94a3b8" },
+  { name: "Consultoria", value: 52, color: "#0a0a3a" },
+  { name: "Essencial", value: 41, color: "#6578c4" },
+  { name: "Institucional", value: 7, color: "#c9a961" },
 ];
 
 const parceirosAdmin = [
@@ -1582,11 +1673,46 @@ type PlatformView =
   | { tela: "aula"; curso: Curso; moduloIdx: number; aulaIdx: number };
 
 function PlatformPage() {
+  const { data: cursosRaw } = useSupabaseQuery(() => cursosApi.getCursos(), []);
+
+  // Adapta cursos do banco para o formato da UI (mantém mock como fallback)
+  const matIcon: Record<string, ElementType> = {
+    Estatística: BarChart2, Metodologia: FileText, "Escrita Científica": FileText,
+    Psicometria: Layers, "Pesquisa Qualitativa": MessageSquare, Ferramentas: Code, Carreira: Trophy,
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dbCursos = ((cursosRaw ?? []) as any[]);
+  const dbTrilhas: Record<string, Curso[]> = {};
+  dbCursos.forEach((c) => {
+    const mat = c.materia ?? "Outros";
+    if (!dbTrilhas[mat]) dbTrilhas[mat] = [];
+    dbTrilhas[mat].push({
+      icon: matIcon[mat] ?? BookOpen,
+      titulo: c.titulo,
+      desc: c.descricao ?? "",
+      foto: c.thumbnail_url ?? "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=70",
+      duracao: c.duracao_total_minutos ? `${Math.floor(c.duracao_total_minutos / 60)}h ${c.duracao_total_minutos % 60}min` : "—",
+      aulas: 0,
+      nivel: c.nivel ?? "Iniciante",
+      instrutor: "Dra. Sandri",
+      modulos: modulosPadrao(c.titulo),
+    });
+  });
+  const liveTrilhas = Object.keys(dbTrilhas).length > 0 ? dbTrilhas : trilhaCourses;
+
   const [visibleCats, setVisibleCats] = useState<Set<string>>(
     () => new Set(Object.keys(trilhaCourses))
   );
   const [view, setView] = useState<PlatformView>({ tela: "lista" });
-  const trilhas = Object.keys(trilhaCourses);
+  const [progresso, setProgresso] = useState<Set<string>>(new Set());
+  const onConcluirAula = (key: string) =>
+    setProgresso((prev) => new Set([...prev, key]));
+  const trilhas = Object.keys(liveTrilhas);
+
+  useEffect(() => {
+    if (Object.keys(dbTrilhas).length > 0) setVisibleCats(new Set(Object.keys(dbTrilhas)));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cursosRaw]);
 
   const toggleCat = (cat: string) => {
     setVisibleCats((prev) => {
@@ -1622,80 +1748,52 @@ function PlatformPage() {
         onSelect={(moduloIdx, aulaIdx) =>
           setView({ tela: "aula", curso: view.curso, moduloIdx, aulaIdx })
         }
+        progresso={progresso}
+        onConcluirAula={onConcluirAula}
       />
     );
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-      {/* Mobile filter pills */}
-      <div className="md:hidden flex items-center gap-2 overflow-x-auto -mx-1 px-1 pb-2 flex-wrap">
+    <div className="flex flex-col gap-5">
+      {/* Filter navbar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1" style={{ borderBottom: "1px solid rgba(101,120,196,0.12)" }}>
         {trilhas.map((t) => {
           const ativo = visibleCats.has(t);
+          const count = liveTrilhas[t].length;
           return (
             <button
               key={t}
               onClick={() => toggleCat(t)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                ativo ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500"
+              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                ativo
+                  ? "text-white shadow-sm"
+                  : "text-slate-500 hover:text-[#6578c4]"
               }`}
+              style={ativo
+                ? { background: "#6578c4", boxShadow: "0 2px 8px rgba(101,120,196,0.30)" }
+                : { background: "#f9f3dd" }}
             >
               {t}
+              <span className={`text-[10px] font-medium ${ativo ? "text-white/70" : "text-slate-400"}`}>{count}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Desktop sidebar filter */}
-      <aside className="hidden md:block w-48 flex-shrink-0">
-        <div className="sticky top-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-2">
-            Módulos
-          </div>
-          <nav className="space-y-0.5">
-            {trilhas.map((t) => {
-              const ativo = visibleCats.has(t);
-              const count = trilhaCourses[t].length;
-              return (
-                <button
-                  key={t}
-                  onClick={() => toggleCat(t)}
-                  className={`w-full flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm transition-colors text-left ${
-                    ativo
-                      ? "bg-slate-100 text-slate-900 font-semibold"
-                      : "text-slate-400 hover:text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div
-                      className={`w-3.5 h-3.5 rounded-sm border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-                        ativo ? "bg-slate-800 border-slate-800" : "border-slate-300"
-                      }`}
-                    >
-                      {ativo && <Check className="w-2 h-2 text-white" strokeWidth={3} />}
-                    </div>
-                    <span className="truncate">{t}</span>
-                  </div>
-                  <span className="text-[10px] font-medium text-slate-400 flex-shrink-0">
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      </aside>
-
       {/* All course sections stacked */}
-      <div className="flex-1 min-w-0 space-y-8">
+      <div className="space-y-8">
         {trilhas
           .filter((cat) => visibleCats.has(cat))
           .map((cat) => {
-            const cards = trilhaCourses[cat];
+            const cards = liveTrilhas[cat];
             return (
               <section key={cat}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-semibold text-slate-800">{cat}</h2>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 rounded-full" style={{ background: "#6578c4" }} />
+                    <h2 className="text-base font-semibold text-slate-800">{cat}</h2>
+                  </div>
                   <span className="text-xs text-slate-400">{cards.length} cursos</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 fx-stagger">
@@ -1788,7 +1886,7 @@ function CursoDetalhe({
                 <User className="w-3.5 h-3.5" /> {curso.instrutor}
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" /> {curso.duracao}
+                <Clock className="w-3.5 h-3.5" /> {calcDuracaoTotal(curso.modulos)}
               </span>
               <span className="flex items-center gap-1.5">
                 <BookOpen className="w-3.5 h-3.5" /> {curso.aulas} aulas
@@ -1863,7 +1961,8 @@ function CursoDetalhe({
           <div className="rounded-xl border border-slate-200 bg-white/70 backdrop-blur-sm p-5 sticky top-4">
             <button
               onClick={() => onPlay(0, 0)}
-              className="w-full bg-slate-900 text-white text-sm font-semibold py-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 mb-4"
+              className="w-full text-white text-sm font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mb-4"
+              style={{ background: "linear-gradient(135deg, #6578c4 0%, #0a0a3a 100%)" }}
             >
               <Send className="w-4 h-4 -rotate-45 translate-x-px" /> Começar curso
             </button>
@@ -1874,7 +1973,7 @@ function CursoDetalhe({
               </div>
               <div className="flex items-center justify-between text-slate-500">
                 <span>Duração total</span>
-                <span className="text-slate-800 font-medium">{curso.duracao}</span>
+                <span className="text-slate-800 font-medium">{calcDuracaoTotal(curso.modulos)}</span>
               </div>
               <div className="flex items-center justify-between text-slate-500">
                 <span>Aulas</span>
@@ -1902,15 +2001,45 @@ function AulaPlayer({
   aulaIdx,
   onBack,
   onSelect,
+  progresso,
+  onConcluirAula,
 }: {
   curso: Curso;
   moduloIdx: number;
   aulaIdx: number;
   onBack: () => void;
   onSelect: (moduloIdx: number, aulaIdx: number) => void;
+  progresso: Set<string>;
+  onConcluirAula: (key: string) => void;
 }) {
+  const [tab, setTab] = useState<null | "material" | "duvida">(null);
+  const [duvida, setDuvida] = useState("");
+  const [duvidas, setDuvidas] = useState<{ texto: string; de: "aluno" | "prof" }[]>([
+    { texto: "Como interpretar o p-valor nesse contexto específico?", de: "aluno" },
+    { texto: "Ótima pergunta! O p-valor indica a probabilidade de obter os resultados observados assumindo H₀ verdadeira. Quando p < 0,05, rejeitamos H₀.", de: "prof" },
+  ]);
+
   const modulo = curso.modulos[moduloIdx];
   const aula = modulo.aulas[aulaIdx];
+  const aulaKey = `${moduloIdx}-${aulaIdx}`;
+  const jaConcluida = progresso.has(aulaKey);
+
+  const temProxima = aulaIdx < modulo.aulas.length - 1 || moduloIdx < curso.modulos.length - 1;
+  const handleProximaAula = () => {
+    onConcluirAula(aulaKey);
+    if (aulaIdx < modulo.aulas.length - 1) {
+      onSelect(moduloIdx, aulaIdx + 1);
+    } else if (moduloIdx < curso.modulos.length - 1) {
+      onSelect(moduloIdx + 1, 0);
+    }
+  };
+
+  const materiais = [
+    { nome: "Slides da aula", tipo: "PDF" },
+    { nome: "Código-exemplo R", tipo: "R" },
+    { nome: "Exercício prático", tipo: "PDF" },
+  ];
+
   return (
     <div>
       <button
@@ -1957,21 +2086,114 @@ function AulaPlayer({
           <h1 className="text-xl font-bold text-slate-900 mb-2">
             {aula.titulo}
           </h1>
-          <p className="text-sm text-slate-600 leading-relaxed mb-6">
+          <p className="text-sm text-slate-600 leading-relaxed mb-4">
             Nesta aula, a Dra. Sandri apresenta os pontos centrais sobre <span className="font-medium text-slate-800">{aula.titulo.toLowerCase()}</span>, com exemplos práticos do curso de {curso.titulo}. Materiais complementares ficam disponíveis na aba abaixo.
           </p>
 
-          <div className="border-t border-slate-200 pt-4 flex items-center gap-6 text-xs text-slate-500">
-            <button className="flex items-center gap-1.5 hover:text-slate-800 transition-colors">
+          <div className="border-t border-slate-200 pt-4 flex items-center gap-4 text-xs flex-wrap">
+            <button
+              onClick={() => setTab(tab === "material" ? null : "material")}
+              className={`flex items-center gap-1.5 transition-colors font-medium ${tab === "material" ? "text-[#6578c4]" : "text-slate-500 hover:text-slate-800"}`}
+            >
               <Download className="w-3.5 h-3.5" /> Material da aula
             </button>
-            <button className="flex items-center gap-1.5 hover:text-slate-800 transition-colors">
-              <FileText className="w-3.5 h-3.5" /> Transcrição
-            </button>
-            <button className="flex items-center gap-1.5 hover:text-slate-800 transition-colors">
+            <button
+              onClick={() => setTab(tab === "duvida" ? null : "duvida")}
+              className={`flex items-center gap-1.5 transition-colors font-medium ${tab === "duvida" ? "text-[#6578c4]" : "text-slate-500 hover:text-slate-800"}`}
+            >
               <MessageSquare className="w-3.5 h-3.5" /> Tirar dúvida
             </button>
+            <div className="flex-1" />
+            {temProxima ? (
+              <button
+                onClick={handleProximaAula}
+                className="flex items-center gap-1.5 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+                style={{ background: "#6578c4" }}
+              >
+                Próxima aula <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                onClick={() => onConcluirAula(aulaKey)}
+                className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${jaConcluida ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "border-[#6578c4]/40 text-[#6578c4]"}`}
+              >
+                <Check className="w-3.5 h-3.5" /> {jaConcluida ? "Concluída ✓" : "Concluir curso"}
+              </button>
+            )}
           </div>
+
+          {/* Material da aula panel */}
+          {tab === "material" && (
+            <div className="mt-4 rounded-xl border border-slate-200 bg-white/80 p-4">
+              <div className="text-xs font-semibold text-slate-700 mb-3">Materiais desta aula</div>
+              <div className="space-y-1">
+                {materiais.map((mat, i) => (
+                  <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-0">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(101,120,196,0.12)" }}>
+                      <Download className="w-4 h-4" style={{ color: "#6578c4" }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-slate-800 truncate">{mat.nome}</div>
+                      <div className="text-[10px] text-slate-400">{mat.tipo}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-400 mt-3">Materiais adicionados pela Dra. Sandri para esta aula.</p>
+            </div>
+          )}
+
+          {/* Tirar dúvida panel */}
+          {tab === "duvida" && (
+            <div className="mt-4 rounded-xl border border-slate-200 bg-white/80 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="text-xs font-semibold text-slate-700">Tirar dúvida — {aula.titulo}</div>
+                <div className="text-[11px] text-slate-400">Envie sua dúvida. A professora responderá em breve.</div>
+              </div>
+              <div className="px-4 py-3 space-y-3 max-h-56 overflow-y-auto">
+                {duvidas.map((d, i) => (
+                  <div key={i} className={`flex gap-2 ${d.de === "aluno" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className="max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed"
+                      style={d.de === "aluno"
+                        ? { background: "#6578c4", color: "#fff" }
+                        : { background: "#f1f5f9", color: "#1e293b" }}
+                    >
+                      {d.de === "prof" && (
+                        <div className="text-[10px] font-semibold mb-0.5" style={{ color: "#c9a961" }}>Dra. Sandri</div>
+                      )}
+                      {d.texto}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="px-4 py-3 border-t border-slate-100 flex gap-2">
+                <input
+                  value={duvida}
+                  onChange={(e) => setDuvida(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && duvida.trim()) {
+                      setDuvidas((prev) => [...prev, { texto: duvida.trim(), de: "aluno" }]);
+                      setDuvida("");
+                    }
+                  }}
+                  placeholder="Escreva sua dúvida..."
+                  className="flex-1 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#6578c4]"
+                />
+                <button
+                  onClick={() => {
+                    if (!duvida.trim()) return;
+                    setDuvidas((prev) => [...prev, { texto: duvida.trim(), de: "aluno" }]);
+                    setDuvida("");
+                  }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white hover:opacity-90 transition-opacity flex-shrink-0"
+                  style={{ background: "#6578c4" }}
+                >
+                  <Send className="w-3.5 h-3.5 -rotate-45 translate-x-px" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <aside>
@@ -1992,14 +2214,17 @@ function AulaPlayer({
                   </div>
                   {m.aulas.map((a, ai) => {
                     const ativo = mi === moduloIdx && ai === aulaIdx;
+                    const concluida = progresso.has(`${mi}-${ai}`);
                     return (
                       <button
                         key={ai}
                         onClick={() => onSelect(mi, ai)}
                         className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${ativo ? "bg-slate-900 text-white" : "hover:bg-slate-50 text-slate-700"}`}
                       >
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${ativo ? "bg-white text-slate-900" : "border border-slate-300 text-slate-400"}`}>
-                          <Send className="w-2.5 h-2.5 -rotate-45 translate-x-px" strokeWidth={2.5} />
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${ativo ? "bg-white text-slate-900" : concluida ? "bg-emerald-500 border-2 border-emerald-500 text-white" : "border border-slate-300 text-slate-400"}`}>
+                          {concluida && !ativo
+                            ? <Check className="w-2.5 h-2.5" />
+                            : <Send className="w-2.5 h-2.5 -rotate-45 translate-x-px" strokeWidth={2.5} />}
                         </div>
                         <span className="flex-1 text-xs leading-snug">
                           {a.titulo}
@@ -2026,6 +2251,15 @@ function ParceriaPage() {
   const [plano, setPlano] = useState<"pro" | "premium">("pro");
   const [faixa, setFaixa] = useState<number | null>(null);
   const [vagas, setVagas] = useState(10);
+  const [parcNome, setParcNome] = useState("");
+  const [parcInstituicao, setParcInstituicao] = useState("");
+  const [parcCargo, setParcCargo] = useState("Professor");
+  const [parcTelefone, setParcTelefone] = useState("");
+  const [parcMensagem, setParcMensagem] = useState("");
+  const [parcEmail, setParcEmail] = useState("");
+  const [parcErro, setParcErro] = useState("");
+  const [parcEnviado, setParcEnviado] = useState(false);
+  const [parcEnviando, setParcEnviando] = useState(false);
   const precos: Record<"pro" | "premium", number> = {
     pro: 997,
     premium: 1497,
@@ -2059,7 +2293,9 @@ function ParceriaPage() {
               Nome completo
             </label>
             <input
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={parcNome}
+              onChange={(e) => setParcNome(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4]"
               placeholder="Seu nome"
             />
           </div>
@@ -2068,7 +2304,9 @@ function ParceriaPage() {
               Instituição
             </label>
             <input
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={parcInstituicao}
+              onChange={(e) => setParcInstituicao(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4]"
               placeholder="Nome da instituição"
             />
           </div>
@@ -2077,7 +2315,11 @@ function ParceriaPage() {
           <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1 block">
             Cargo
           </label>
-          <select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+          <select
+            value={parcCargo}
+            onChange={(e) => setParcCargo(e.target.value)}
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4] bg-white"
+          >
             {[
               "Professor",
               "Coordenador",
@@ -2195,7 +2437,9 @@ function ParceriaPage() {
           </label>
           <textarea
             rows={3}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            value={parcMensagem}
+            onChange={(e) => { setParcMensagem(e.target.value); if (parcErro) setParcErro(""); }}
+            className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4] resize-none ${!parcMensagem.trim() && parcErro ? "border-red-400" : "border-slate-200"}`}
             placeholder="Descreva sua demanda ou dúvidas..."
           />
         </div>
@@ -2206,7 +2450,9 @@ function ParceriaPage() {
             </label>
             <input
               type="email"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={parcEmail}
+              onChange={(e) => { setParcEmail(e.target.value); if (parcErro) setParcErro(""); }}
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4] ${!parcEmail.trim() && parcErro ? "border-red-400" : "border-slate-200"}`}
               placeholder="seu@email.com"
             />
           </div>
@@ -2216,13 +2462,50 @@ function ParceriaPage() {
             </label>
             <input
               type="tel"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={parcTelefone}
+              onChange={(e) => setParcTelefone(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4]"
               placeholder="(11) 99999-9999"
             />
           </div>
         </div>
-        <button className="w-full bg-slate-800 text-white rounded-lg py-3 text-sm font-semibold hover:bg-slate-900 transition-colors flex items-center justify-center gap-2">
-          <Send className="w-4 h-4" /> Enviar Solicitação
+        {parcErro && (
+          <p className="text-xs text-red-500 flex items-center gap-1">
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> {parcErro}
+          </p>
+        )}
+        {parcEnviado && (
+          <div className="flex items-center gap-2 text-sm font-medium rounded-lg px-4 py-3" style={{ background: "rgba(101,120,196,0.1)", color: "#6578c4" }}>
+            <Check className="w-4 h-4 flex-shrink-0" /> Solicitação enviada! Entraremos em contato em breve.
+          </div>
+        )}
+        <button
+          onClick={async () => {
+            if (!parcNome.trim()) { setParcErro("Informe seu nome."); return; }
+            if (!parcEmail.trim() || !parcEmail.includes("@")) { setParcErro("Informe um e-mail válido."); return; }
+            if (!parcMensagem.trim()) { setParcErro("Descreva sua demanda antes de enviar."); return; }
+            setParcErro("");
+            setParcEnviando(true);
+            const { error } = await parceriasApi.solicitarParceria({
+              nome: parcNome,
+              instituicao: parcInstituicao || null,
+              cargo: parcCargo || null,
+              plano,
+              vagas,
+              email: parcEmail,
+              telefone: parcTelefone || null,
+              mensagem: parcMensagem || null,
+            });
+            setParcEnviando(false);
+            if (error) { setParcErro("Erro ao enviar. Tente novamente."); return; }
+            notifyAdmin({ type: "parceria", nome: parcNome, email: parcEmail, instituicao: parcInstituicao || "Não informada", mensagem: parcMensagem }).catch(() => {});
+            setParcEnviado(true);
+          }}
+          disabled={parcEnviando}
+          className="w-full text-white rounded-lg py-3 text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+          style={{ background: "linear-gradient(135deg, #6578c4 0%, #0a0a3a 100%)" }}
+        >
+          <Send className="w-4 h-4" /> {parcEnviando ? "Enviando..." : "Enviar Solicitação"}
         </button>
       </div>
     </div>
@@ -2231,19 +2514,20 @@ function ParceriaPage() {
 
 // ─── PAGE: CERTIFICADOS ────────────────────────────────────────────────────
 
-function gerarCertificadoHTML(cursoNome: string) {
-  const aluno = "Sandro Alves de Medeiros";
+function gerarCertificadoHTML(cursoNome: string, alunoNome?: string, codigoVerificacao?: string) {
+  const aluno = alunoNome ?? "Aluno";
   const cargaHoraria = "40h";
   const data = new Date().toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
-  const codigo =
+  const codigo = codigoVerificacao ?? (
     "CERT-" +
     Math.random().toString(36).slice(2, 8).toUpperCase() +
     "-" +
-    new Date().getFullYear();
+    new Date().getFullYear()
+  );
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -2491,16 +2775,33 @@ function gerarCertificadoHTML(cursoNome: string) {
 }
 
 function CertificadosPage() {
+  const { usuario } = useAuthContext();
+  const { data: certsRaw } = useSupabaseQuery(
+    () => usuario ? certificadosApi.getCertificadosUsuario(usuario.id) : Promise.resolve({ data: [], error: null }),
+    [usuario?.id]
+  );
+
   const [aberto, setAberto] = useState<{ cursoNome: string; html: string; codigo: string } | null>(null);
   const [naoOpen, setNaoOpen] = useState(true);
   const [concluidosOpen, setConcluidosOpen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  useModalBlur(!!aberto);
 
-  const concluidos = cursosData.filter((c) => c.progress === 100);
-  const nao = cursosData.filter((c) => c.progress < 100);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dbCerts = ((certsRaw ?? []) as any[]).map((c) => ({
+    id: c.id,
+    nome: c.cursos?.titulo ?? "Curso",
+    progress: 100,
+    cat: c.cursos?.materia ?? "Certificado",
+    emitido_em: c.emitido_em,
+    codigo: c.codigo_verificacao,
+  }));
 
-  const abrirEmissao = (cursoNome: string) => {
-    const { html, codigo } = gerarCertificadoHTML(cursoNome);
+  const concluidos = dbCerts.length > 0 ? dbCerts : cursosData.filter((c) => c.progress === 100);
+  const nao = dbCerts.length > 0 ? [] : cursosData.filter((c) => c.progress < 100);
+
+  const abrirEmissao = (cursoNome: string, codigoReal?: string) => {
+    const { html, codigo } = gerarCertificadoHTML(cursoNome, usuario?.nome ?? undefined, codigoReal);
     setAberto({ cursoNome, html, codigo });
   };
 
@@ -2599,7 +2900,7 @@ function CertificadosPage() {
                 </div>
               </div>
               <button
-                onClick={() => done && abrirEmissao(c.nome)}
+                onClick={() => done && abrirEmissao(c.nome, (c as { codigo?: string }).codigo)}
                 className={`flex-shrink-0 text-xs font-semibold px-3 sm:px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${done ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
               >
                 {done ? (
@@ -2629,7 +2930,7 @@ function CertificadosPage() {
       {/* Modal de preview do certificado */}
       {aberto && (
         <div
-          className="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex flex-col fx-modal-backdrop"
+          className="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm flex flex-col fx-modal-backdrop"
           onClick={() => setAberto(null)}
         >
           <div
@@ -2656,7 +2957,8 @@ function CertificadosPage() {
                 </button>
                 <button
                   onClick={imprimir}
-                  className="text-xs font-semibold px-3 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+                  className="text-xs font-semibold px-3 py-2 rounded-lg text-white hover:opacity-90 transition-opacity flex items-center gap-1.5"
+                  style={{ background: "#0a0a3a" }}
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Imprimir / Salvar PDF</span>
@@ -2673,7 +2975,7 @@ function CertificadosPage() {
             </div>
 
             {/* Aviso no mobile */}
-            <div className="md:hidden bg-blue-50 border-b border-blue-100 px-4 py-2.5 text-[11px] text-blue-800 leading-snug flex-shrink-0">
+            <div className="md:hidden bg-[#6578c4]/10 border-b border-blue-100 px-4 py-2.5 text-[11px] text-blue-800 leading-snug flex-shrink-0">
               No celular, use <strong>Imprimir / Salvar PDF</strong> ou <strong>Baixar HTML</strong> e depois abra no computador para salvar como PDF.
             </div>
 
@@ -2696,7 +2998,30 @@ function CertificadosPage() {
 // ─── PAGE: ATENDIMENTO ─────────────────────────────────────────────────────
 
 function AtendimentoPage() {
+  const { usuario } = useAuthContext();
   const [sent, setSent] = useState(false);
+  const [assunto, setAssunto] = useState("");
+  const [mensagem, setMensagem] = useState("");
+  const [erro, setErro] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
+  const handleEnviar = async () => {
+    if (!assunto.trim()) { setErro("Preencha o assunto da mensagem."); return; }
+    if (!mensagem.trim()) { setErro("Escreva sua mensagem antes de enviar."); return; }
+    if (!usuario) { setErro("Você precisa estar logado."); return; }
+    setErro("");
+    setEnviando(true);
+    const { error } = await atendimentoApi.createTicket({
+      usuario_id: usuario.id,
+      assunto,
+      mensagem,
+    });
+    setEnviando(false);
+    if (error) { setErro("Erro ao enviar. Tente novamente."); return; }
+    notifyAdmin({ type: "atendimento", nome: usuario.nome ?? usuario.email, email: usuario.email, assunto, mensagem }).catch(() => {});
+    setSent(true);
+  };
+
   return (
     <div className="flex items-start justify-center pt-8">
       <div className="rounded-xl border border-white/60 bg-white/58 backdrop-blur-xl shadow-[0_18px_50px_rgba(15,23,42,0.08)] p-8 w-full max-w-lg">
@@ -2715,8 +3040,8 @@ function AtendimentoPage() {
         </div>
         {sent ? (
           <div className="text-center py-8">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-slate-700" />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(101,120,196,0.12)" }}>
+              <Check className="w-8 h-8" style={{ color: "#6578c4" }} />
             </div>
             <div className="text-base font-semibold text-slate-800 mb-2">
               Mensagem enviada!
@@ -2725,8 +3050,8 @@ function AtendimentoPage() {
               Nossa equipe entrará em contato em breve.
             </p>
             <button
-              onClick={() => setSent(false)}
-              className="text-sm text-slate-700 hover:underline"
+              onClick={() => { setSent(false); setAssunto(""); setMensagem(""); }}
+              className="text-sm hover:underline" style={{ color: "#6578c4" }}
             >
               Enviar outra mensagem
             </button>
@@ -2737,7 +3062,7 @@ function AtendimentoPage() {
               <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1 block">
                 Categoria
               </label>
-              <select className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <select className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4] bg-white">
                 {[
                   "Dúvida sobre conteúdo",
                   "Problema técnico",
@@ -2752,28 +3077,39 @@ function AtendimentoPage() {
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1 block">
-                Assunto
+                Assunto <span className="text-red-400">*</span>
               </label>
               <input
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={assunto}
+                onChange={(e) => { setAssunto(e.target.value); if (erro) setErro(""); }}
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4] ${!assunto.trim() && erro ? "border-red-400" : "border-slate-200"}`}
                 placeholder="Resumo da sua dúvida"
               />
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1 block">
-                Mensagem
+                Mensagem <span className="text-red-400">*</span>
               </label>
               <textarea
                 rows={5}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                value={mensagem}
+                onChange={(e) => { setMensagem(e.target.value); if (erro) setErro(""); }}
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6578c4] resize-none ${!mensagem.trim() && erro ? "border-red-400" : "border-slate-200"}`}
                 placeholder="Descreva sua dúvida com detalhes..."
               />
             </div>
+            {erro && (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> {erro}
+              </p>
+            )}
             <button
-              onClick={() => setSent(true)}
-              className="w-full bg-blue-600 text-white rounded-lg py-3 text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              onClick={handleEnviar}
+              disabled={enviando}
+              className="w-full text-white rounded-lg py-3 text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+              style={{ background: "#6578c4" }}
             >
-              <Send className="w-4 h-4" /> Enviar Mensagem
+              <Send className="w-4 h-4" /> {enviando ? "Enviando..." : "Enviar Mensagem"}
             </button>
           </div>
         )}
@@ -2952,11 +3288,45 @@ function AtualizacoesPage() {
 // ─── PAGE: GPTs ───────────────────────────────────────────────────────────
 
 function GPTsPage() {
-  const cats = gptsCategorias.filter((c) => c !== "Todos");
+  const { data: gptsRaw } = useSupabaseQuery(() => gptsApi.getGpts(), []);
+
+  const catIcon: Record<string, ElementType> = {
+    Análise: BarChart2, Metodologia: FileText, Escrita: BookOpen,
+    Psicometria: Layers, Geral: Brain,
+  };
+  const catCor: Record<string, string> = {
+    Análise: "from-blue-500 to-indigo-600",
+    Metodologia: "from-emerald-500 to-teal-600",
+    Escrita: "from-rose-500 to-pink-600",
+    Psicometria: "from-violet-500 to-purple-600",
+    Geral: "from-slate-500 to-slate-700",
+  };
+
+  const dbGpts = (gptsRaw ?? []).map((g) => ({
+    id: g.id,
+    nome: g.titulo,
+    autora: "Dra. Sandri",
+    desc: g.descricao ?? "",
+    cat: g.categoria ?? "Geral",
+    icon: catIcon[g.categoria ?? ""] ?? Brain,
+    cor: catCor[g.categoria ?? ""] ?? "from-slate-500 to-slate-700",
+    conversas: "",
+    link: g.url ?? "#",
+  }));
+  const liveGpts = dbGpts.length > 0 ? dbGpts : gptsData;
+  const liveCats = [...new Set(liveGpts.map((g) => g.cat))];
+
   const [visibleCats, setVisibleCats] = useState<Set<string>>(
-    () => new Set(cats),
+    () => new Set(gptsCategorias.filter((c) => c !== "Todos")),
   );
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (liveCats.length > 0) setVisibleCats(new Set(liveCats));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gptsRaw]);
+
+  const cats = liveCats;
 
   const toggleCat = (cat: string) => {
     setVisibleCats((prev) => {
@@ -2973,7 +3343,7 @@ function GPTsPage() {
   const visibleSections = cats.filter((cat) => visibleCats.has(cat));
   const hasResults = visibleSections.some(
     (cat) =>
-      gptsData.filter(
+      liveGpts.filter(
         (g) =>
           g.cat === cat &&
           g.nome.toLowerCase().includes(search.toLowerCase()),
@@ -2981,108 +3351,45 @@ function GPTsPage() {
   );
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-      {/* Mobile filter pills */}
-      <div className="md:hidden flex items-center gap-2 overflow-x-auto -mx-1 px-1 pb-2 flex-wrap">
-        {cats.map((cat) => {
-          const ativo = visibleCats.has(cat);
-          return (
-            <button
-              key={cat}
-              onClick={() => toggleCat(cat)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                ativo
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Desktop sidebar */}
-      <aside className="hidden md:block w-48 flex-shrink-0">
-        <div className="sticky top-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-2">
-            Categorias
-          </div>
-          <nav className="space-y-0.5">
-            {cats.map((cat) => {
-              const ativo = visibleCats.has(cat);
-              const count = gptsData.filter((g) => g.cat === cat).length;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => toggleCat(cat)}
-                  className={`w-full flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm transition-colors text-left ${
-                    ativo
-                      ? "bg-slate-100 text-slate-900 font-semibold"
-                      : "text-slate-400 hover:text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div
-                      className={`w-3.5 h-3.5 rounded-sm border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-                        ativo
-                          ? "bg-slate-800 border-slate-800"
-                          : "border-slate-300"
-                      }`}
-                    >
-                      {ativo && (
-                        <Check className="w-2 h-2 text-white" strokeWidth={3} />
-                      )}
-                    </div>
-                    <span className="truncate">{cat}</span>
-                  </div>
-                  <span className="text-[10px] font-medium text-slate-400 flex-shrink-0">
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="mt-4 pt-4 border-t border-slate-100 px-1">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-7 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-400 w-full bg-white/70"
-                placeholder="Buscar..."
-              />
-            </div>
-          </div>
-
-          <div className="mt-5 pt-4 border-t border-slate-100 px-2">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              Sobre os GPTs
-            </div>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              GPTs especializados criados pela Dra. Sandri para apoiar pesquisa,
-              análise e escrita científica.
-            </p>
-          </div>
+    <div className="flex flex-col gap-5">
+      {/* Filter navbar + search */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-1 -mx-1 px-1">
+          {cats.map((cat) => {
+            const ativo = visibleCats.has(cat);
+            const count = liveGpts.filter((g) => g.cat === cat).length;
+            return (
+              <button
+                key={cat}
+                onClick={() => toggleCat(cat)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  ativo ? "text-white" : "text-slate-500 hover:text-[#6578c4]"
+                }`}
+              style={ativo
+                ? { background: "#6578c4", boxShadow: "0 2px 8px rgba(101,120,196,0.30)" }
+                : { background: "#f9f3dd" }}
+              >
+                {cat}
+                <span className={`text-[10px] font-medium ${ativo ? "text-white/70" : "text-slate-400"}`}>{count}</span>
+              </button>
+            );
+          })}
         </div>
-      </aside>
-
-      {/* Right content: sections by category */}
-      <div className="flex-1 min-w-0 space-y-8">
-        {/* Mobile search */}
-        <div className="md:hidden relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+        <div className="relative flex-shrink-0">
+          <BrandSearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6578c4]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 w-full bg-white/70"
+            className="pl-8 pr-3 py-2 border border-slate-200 rounded-full text-xs focus:outline-none focus:ring-1 focus:ring-[#6578c4]/50 w-full sm:w-48 bg-white/70"
             placeholder="Buscar GPT..."
           />
         </div>
+      </div>
+      <div className="border-t border-slate-100" />
 
+      <div className="space-y-8">
         {visibleSections.map((cat) => {
-          const items = gptsData.filter(
+          const items = liveGpts.filter(
             (g) =>
               g.cat === cat &&
               g.nome.toLowerCase().includes(search.toLowerCase()),
@@ -3091,9 +3398,10 @@ function GPTsPage() {
           return (
             <section key={cat}>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-slate-800">
-                  {cat}
-                </h2>
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 rounded-full" style={{ background: "#6578c4" }} />
+                  <h2 className="text-base font-semibold text-slate-800">{cat}</h2>
+                </div>
                 <span className="text-xs text-slate-400">{items.length} GPTs</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 fx-stagger">
@@ -3148,13 +3456,43 @@ function GPTsPage() {
 // ─── PAGE: BIBLIOTECA DE PROMPTS ──────────────────────────────────────────
 
 function BibliotecaPage() {
-  const cats = promptsCategorias.filter((c) => c !== "Todos");
+  type LivePrompt = { id: string | number; titulo: string; cat: string; desc: string; prompt: string; autor: string; favoritos: number; cor: string };
+
+  const { data: promptsRaw } = useSupabaseQuery(() => promptsApi.getPrompts(), []);
+  const catCor: Record<string, string> = {
+    Escrita: "from-rose-500 to-pink-600",
+    Análise: "from-blue-500 to-indigo-600",
+    Metodologia: "from-emerald-500 to-teal-600",
+    Submissão: "from-amber-500 to-orange-600",
+    Geral: "from-slate-500 to-slate-700",
+  };
+  const dbPrompts: LivePrompt[] = (promptsRaw ?? []).map((p) => ({
+    id: p.id,
+    titulo: p.titulo,
+    cat: p.categoria ?? "Geral",
+    desc: p.descricao ?? "",
+    prompt: p.conteudo,
+    autor: "Dra. Sandri",
+    favoritos: 0,
+    cor: catCor[p.categoria ?? ""] ?? "from-slate-500 to-slate-700",
+  }));
+  const livePrompts: LivePrompt[] = dbPrompts.length > 0 ? dbPrompts : promptsData;
+  const liveCatsList = [...new Set(livePrompts.map((p) => p.cat))];
+
   const [visibleCats, setVisibleCats] = useState<Set<string>>(
-    () => new Set(cats),
+    () => new Set(promptsCategorias.filter((c) => c !== "Todos")),
   );
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<typeof promptsData[number] | null>(null);
+  const [selected, setSelected] = useState<LivePrompt | null>(null);
   const [copied, setCopied] = useState(false);
+  useModalBlur(!!selected);
+
+  useEffect(() => {
+    if (liveCatsList.length > 0) setVisibleCats(new Set(liveCatsList));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [promptsRaw]);
+
+  const cats = liveCatsList;
 
   const toggleCat = (cat: string) => {
     setVisibleCats((prev) => {
@@ -3182,7 +3520,7 @@ function BibliotecaPage() {
   const visibleSections = cats.filter((c) => visibleCats.has(c));
   const hasResults = visibleSections.some(
     (cat) =>
-      promptsData.filter(
+      livePrompts.filter(
         (p) =>
           p.cat === cat &&
           (p.titulo.toLowerCase().includes(search.toLowerCase()) ||
@@ -3191,110 +3529,44 @@ function BibliotecaPage() {
   );
 
   return (<>
-    <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-      {/* Mobile filter pills */}
-      <div className="md:hidden flex items-center gap-2 overflow-x-auto -mx-1 px-1 pb-2 flex-wrap">
-        {cats.map((cat) => {
-          const ativo = visibleCats.has(cat);
-          return (
-            <button
-              key={cat}
-              onClick={() => toggleCat(cat)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                ativo
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Desktop sidebar */}
-      <aside className="hidden md:block w-48 flex-shrink-0">
-        <div className="sticky top-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-2">
-            Categorias
-          </div>
-          <nav className="space-y-0.5">
-            {cats.map((cat) => {
-              const ativo = visibleCats.has(cat);
-              const count = promptsData.filter((p) => p.cat === cat).length;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => toggleCat(cat)}
-                  className={`w-full flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm transition-colors text-left ${
-                    ativo
-                      ? "bg-slate-100 text-slate-900 font-semibold"
-                      : "text-slate-400 hover:text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div
-                      className={`w-3.5 h-3.5 rounded-sm border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-                        ativo
-                          ? "bg-slate-800 border-slate-800"
-                          : "border-slate-300"
-                      }`}
-                    >
-                      {ativo && (
-                        <Check className="w-2 h-2 text-white" strokeWidth={3} />
-                      )}
-                    </div>
-                    <span className="truncate">{cat}</span>
-                  </div>
-                  <span className="text-[10px] font-medium text-slate-400 flex-shrink-0">
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="mt-4 pt-4 border-t border-slate-100 px-1">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-7 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-400 w-full bg-white/70"
-                placeholder="Buscar..."
-              />
-            </div>
-          </div>
-
-          <div className="mt-5 pt-4 border-t border-slate-100 px-2">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              Total
-            </div>
-            <p className="text-2xl font-bold text-slate-800 mb-0.5">
-              {promptsData.length}
-            </p>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              prompts prontos para pesquisa e escrita científica
-            </p>
-          </div>
+    <div className="flex flex-col gap-5">
+      {/* Filter navbar + search */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-1 -mx-1 px-1">
+          {cats.map((cat) => {
+            const ativo = visibleCats.has(cat);
+            const count = livePrompts.filter((p) => p.cat === cat).length;
+            return (
+              <button
+                key={cat}
+                onClick={() => toggleCat(cat)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  ativo ? "text-white" : "text-slate-500 hover:text-[#6578c4]"
+                }`}
+                style={ativo
+                  ? { background: "#6578c4", boxShadow: "0 2px 8px rgba(101,120,196,0.30)" }
+                  : { background: "#f9f3dd" }}
+              >
+                {cat}
+                <span className={`text-[10px] font-medium ${ativo ? "text-white/70" : "text-slate-400"}`}>{count}</span>
+              </button>
+            );
+          })}
         </div>
-      </aside>
-
-      {/* Right content */}
-      <div className="flex-1 min-w-0 space-y-8">
-        {/* Mobile search */}
-        <div className="md:hidden relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+        <div className="relative flex-shrink-0">
+          <BrandSearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6578c4]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 w-full bg-white/70"
+            className="pl-8 pr-3 py-2 border border-slate-200 rounded-full text-xs focus:outline-none focus:ring-1 focus:ring-slate-400 w-full sm:w-48 bg-white/70"
             placeholder="Buscar prompt..."
           />
         </div>
-
+      </div>
+      <div className="border-t border-slate-100" />
+      <div className="space-y-8">
         {visibleSections.map((cat) => {
-          const items = promptsData.filter(
+          const items = livePrompts.filter(
             (p) =>
               p.cat === cat &&
               (p.titulo.toLowerCase().includes(search.toLowerCase()) ||
@@ -3304,7 +3576,10 @@ function BibliotecaPage() {
           return (
             <section key={cat}>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-slate-800">{cat}</h2>
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 rounded-full" style={{ background: "#6578c4" }} />
+                  <h2 className="text-base font-semibold text-slate-800">{cat}</h2>
+                </div>
                 <span className="text-xs text-slate-400">{items.length} prompts</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 fx-stagger">
@@ -3396,7 +3671,8 @@ function BibliotecaPage() {
             </button>
             <button
               onClick={copy}
-              className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${copied ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-900 text-white hover:bg-slate-800"}`}
+              className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${copied ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "text-white hover:opacity-90"}`}
+              style={!copied ? { background: "#6578c4" } : {}}
             >
               {copied ? (
                 <><Check className="w-4 h-4" /> Copiado</>
@@ -3418,6 +3694,7 @@ function LivrosPage() {
     () => new Set(livrosCategorias.map((c) => c.id))
   );
   const [selecionado, setSelecionado] = useState<Livro | null>(null);
+  useModalBlur(!!selecionado);
 
   const toggleCat = (id: string) => {
     setVisibleCats((prev) => {
@@ -3438,79 +3715,46 @@ function LivrosPage() {
   const visibleList = livrosCategorias.filter((c) => visibleCats.has(c.id));
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-      {/* Mobile filter pills */}
-      <div className="md:hidden flex items-center gap-2 overflow-x-auto -mx-1 px-1 pb-1 flex-wrap">
+    <div className="flex flex-col gap-5">
+      {/* Filter navbar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-100 -mx-1 px-1">
         {livrosCategorias.map((c) => {
           const ativo = visibleCats.has(c.id);
+          const count = livrosData[c.id]?.length || 0;
           return (
             <button
               key={c.id}
               onClick={() => toggleCat(c.id)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${ativo ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                ativo ? "text-white" : "text-slate-500 hover:text-[#6578c4]"
+              }`}
+              style={ativo
+                ? { background: "#6578c4", boxShadow: "0 2px 8px rgba(101,120,196,0.30)" }
+                : { background: "#f9f3dd" }}
             >
+              <c.icon className="w-3 h-3 flex-shrink-0" strokeWidth={2} />
               {c.nome}
+              <span className={`text-[10px] font-medium ${ativo ? "text-white/70" : "text-slate-400"}`}>{count}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Desktop sidebar with checkboxes */}
-      <aside className="hidden md:block w-56 flex-shrink-0">
-        <div className="sticky top-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-2">
-            Áreas
-          </div>
-          <nav className="space-y-0.5">
-            {livrosCategorias.map((c) => {
-              const ativo = visibleCats.has(c.id);
-              const count = livrosData[c.id]?.length || 0;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => toggleCat(c.id)}
-                  className={`w-full flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm transition-colors text-left ${ativo ? "bg-slate-100 text-slate-900 font-semibold" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"}`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div
-                      className={`w-3.5 h-3.5 rounded-sm border-2 flex-shrink-0 flex items-center justify-center transition-colors ${ativo ? "bg-slate-800 border-slate-800" : "border-slate-300"}`}
-                    >
-                      {ativo && <Check className="w-2 h-2 text-white" strokeWidth={3} />}
-                    </div>
-                    <c.icon className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.5} />
-                    <span className="truncate">{c.nome}</span>
-                  </div>
-                  <span className={`text-[10px] font-medium ${ativo ? "text-slate-500" : "text-slate-400"}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="mt-6 pt-5 border-t border-slate-100 px-2">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              Sobre esta seção
-            </div>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Bibliografia que embasa as trilhas, cursos e GPTs da plataforma. Cada livro indica em qual módulo é referência.
-            </p>
-          </div>
-        </div>
-      </aside>
-
       {/* All book sections stacked */}
-      <div className="flex-1 min-w-0 space-y-10">
+      <div className="space-y-10">
         {visibleList.map((catInfo) => {
           const livros = livrosData[catInfo.id] || [];
           return (
             <section key={catInfo.id}>
               <div className="mb-4 sm:mb-5">
-                <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-slate-400 mb-1">
-                  <catInfo.icon className="w-3 h-3" strokeWidth={2} />
-                  {catInfo.nome}
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-1 h-4 rounded-full" style={{ background: "#6578c4" }} />
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#6578c4" }}>
+                    <catInfo.icon className="w-3 h-3" strokeWidth={2} />
+                    {catInfo.nome}
+                  </div>
                 </div>
-                <h2 className="text-base sm:text-lg font-semibold text-slate-800">
+                <h2 className="text-base sm:text-lg font-semibold text-slate-800 pl-3">
                   {livros.length} {livros.length === 1 ? "obra de referência" : "obras de referência"}
                 </h2>
               </div>
@@ -3652,7 +3896,8 @@ function LivrosPage() {
                   href={`https://scholar.google.com/scholar?q=${encodeURIComponent(selecionado.titulo + " " + selecionado.autor)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-semibold bg-slate-900 text-white rounded-lg px-4 py-2 hover:bg-slate-800 transition-colors flex items-center gap-2"
+                  className="text-sm font-semibold text-white rounded-lg px-4 py-2 hover:opacity-90 transition-opacity flex items-center gap-2"
+                  style={{ background: "#6578c4" }}
                 >
                   Buscar no Scholar <ExternalLink className="w-3.5 h-3.5" />
                 </a>
@@ -3667,20 +3912,155 @@ function LivrosPage() {
 
 // ─── PAGE: COMUNIDADE ──────────────────────────────────────────────────────
 
-function ComunidadePage() {
+function ComunidadePage({ onNavigate }: { onNavigate?: (page: Page) => void }) {
+  const { usuario } = useAuthContext();
   const [canalAtivo, setCanalAtivo] = useState("todos");
   const [novoPost, setNovoPost] = useState("");
-  const [likes, setLikes] = useState<Record<number, boolean>>({});
-  const [comentariosAbertos, setComentariosAbertos] = useState<Record<number, boolean>>({});
-  const [comentario, setComentario] = useState<Record<number, string>>({});
+  const [publicando, setPublicando] = useState(false);
+  const [likes, setLikes] = useState<Record<string, boolean>>({});
+  const [likesCount, setLikesCount] = useState<Record<string, number>>({});
+  const [comentariosAbertos, setComentariosAbertos] = useState<Record<string, boolean>>({});
+  const [comentario, setComentario] = useState<Record<string, string>>({});
 
-  const postsFiltrados = postsComunidade.filter(
-    (p) => canalAtivo === "todos" || p.canal === canalAtivo,
+  const { data: postsRaw, refetch: refetchPosts } = useSupabaseQuery(
+    () => comunidadeApi.getPosts(canalAtivo === "todos" ? undefined : canalAtivo),
+    [canalAtivo]
   );
 
-  const toggleLike = (id: number) =>
-    setLikes((l) => ({ ...l, [id]: !l[id] }));
-  const toggleComentarios = (id: number) =>
+  const canalLabel = (canal: string) =>
+    canaisComunidade.find((c) => c.id === canal)?.nome ?? canal;
+
+  type LivePost = {
+    id: string; autor: string; cargo: string; canal: string; canalLabel: string;
+    tempo: string; fixado: boolean; titulo: string; conteudo: string;
+    tags: string[]; likes: number; comentarios: number; salvos: number;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dbPosts: LivePost[] = ((postsRaw ?? []) as any[]).map((p) => {
+    const user = p.usuarios as { id?: string; nome?: string; foto_url?: string } | null;
+    const likesList = (p.comunidade_likes ?? []) as { usuario_id: string }[];
+    const comentsList = (p.comunidade_comentarios ?? []) as { id: string }[];
+    const conteudo = p.conteudo ?? "";
+    const titulo = conteudo.length > 80 ? conteudo.slice(0, 80) + "..." : conteudo;
+    return {
+      id: p.id,
+      autor: user?.nome ?? "Membro",
+      cargo: "",
+      canal: p.canal,
+      canalLabel: canalLabel(p.canal),
+      tempo: new Date(p.criado_em).toLocaleDateString("pt-BR"),
+      fixado: false,
+      titulo,
+      conteudo,
+      tags: p.tags ?? [],
+      likes: likesList.length,
+      comentarios: comentsList.length,
+      salvos: 0,
+    };
+  });
+
+  const livePosts: LivePost[] = dbPosts.length > 0
+    ? dbPosts
+    : postsComunidade.map((p) => ({ ...p, id: String(p.id) }));
+
+  // Inicializa contagem de likes a partir dos dados do banco
+  useEffect(() => {
+    if (dbPosts.length > 0) {
+      const counts: Record<string, number> = {};
+      const userLiked: Record<string, boolean> = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((postsRaw ?? []) as any[]).forEach((p) => {
+        const likesList = (p.comunidade_likes ?? []) as { usuario_id: string }[];
+        counts[p.id] = likesList.length;
+        userLiked[p.id] = usuario ? likesList.some((l) => l.usuario_id === usuario.id) : false;
+      });
+      setLikesCount(counts);
+      setLikes(userLiked);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postsRaw]);
+
+  // Composer attachments
+  const [postImagem, setPostImagem] = useState<string | null>(null);
+  const [postImagemFile, setPostImagemFile] = useState<File | null>(null);
+  const [postDocumento, setPostDocumento] = useState<string | null>(null);
+  const [postDocumentoFile, setPostDocumentoFile] = useState<File | null>(null);
+  const [postTags, setPostTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [showTagInput, setShowTagInput] = useState(false);
+  const imgInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPostImagemFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setPostImagem(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleDocSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) { setPostDocumentoFile(file); setPostDocumento(file.name); }
+    e.target.value = "";
+  };
+
+  const adicionarTag = () => {
+    const t = tagInput.trim().replace(/^#/, "");
+    if (t && !postTags.includes(t) && postTags.length < 5) {
+      setPostTags((prev) => [...prev, t]);
+    }
+    setTagInput("");
+  };
+
+  const publicar = async () => {
+    if (!novoPost.trim() || !usuario) return;
+    setPublicando(true);
+
+    const postId = crypto.randomUUID();
+    let imagemUrl: string | null = null;
+    let documentoUrl: string | null = null;
+
+    if (postImagemFile) {
+      imagemUrl = await storageApi.uploadComunidadeImagem(postId, postImagemFile);
+    }
+    if (postDocumentoFile) {
+      documentoUrl = await storageApi.uploadComunidadeDoc(postId, postDocumentoFile);
+    }
+
+    await comunidadeApi.createPost({
+      usuario_id: usuario.id,
+      conteudo: novoPost,
+      tags: postTags,
+      canal: canalAtivo === "todos" ? "geral" : canalAtivo,
+      imagem_url: imagemUrl,
+      documento_url: documentoUrl,
+    });
+    setNovoPost("");
+    setPostImagem(null);
+    setPostImagemFile(null);
+    setPostDocumento(null);
+    setPostDocumentoFile(null);
+    setPostTags([]);
+    setShowTagInput(false);
+    setPublicando(false);
+    refetchPosts();
+  };
+
+  const postsFiltrados = livePosts;
+
+  const toggleLike = async (id: string) => {
+    const liked = likes[id] ?? false;
+    setLikes((l) => ({ ...l, [id]: !liked }));
+    setLikesCount((c) => ({ ...c, [id]: (c[id] ?? 0) + (liked ? -1 : 1) }));
+    if (usuario) {
+      await comunidadeApi.toggleLike(usuario.id, id, liked);
+    }
+  };
+  const toggleComentarios = (id: string) =>
     setComentariosAbertos((c) => ({ ...c, [id]: !c[id] }));
 
   return (
@@ -3689,7 +4069,10 @@ function ComunidadePage() {
       <div className="md:hidden flex items-center gap-2 overflow-x-auto -mx-1 px-1 pb-1">
         <button
           onClick={() => setCanalAtivo("todos")}
-          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${canalAtivo === "todos" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+          style={canalAtivo === "todos"
+            ? { background: "#6578c4", color: "white", boxShadow: "0 2px 8px rgba(101,120,196,0.30)" }
+            : { background: "#f9f3dd", color: "#64748b" }}
         >
           Todos
         </button>
@@ -3699,7 +4082,10 @@ function ComunidadePage() {
             <button
               key={c.id}
               onClick={() => setCanalAtivo(c.id)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${ativo ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+              className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all"
+              style={ativo
+                ? { background: "#6578c4", color: "white", boxShadow: "0 2px 8px rgba(101,120,196,0.30)" }
+                : { background: "#f9f3dd", color: "#64748b" }}
             >
               {c.nome}
             </button>
@@ -3755,18 +4141,29 @@ function ComunidadePage() {
               <Bell className="w-3 h-3" strokeWidth={2} />
               Atualizações
             </div>
-            <div className="px-2 space-y-2.5 text-xs">
-              {[
-                { icon: BookOpen, texto: "Novo módulo: Mediação Moderada em R" },
-                { icon: Settings, texto: "Atualização do JASP (v0.19)" },
-                { icon: Settings, texto: "Novo GPT: Gerador de Sintaxe R" },
-                { icon: BookOpen, texto: "Curso de Análise de Redes disponível" },
-              ].map((u, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <u.icon className="w-3 h-3 text-slate-400 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                  <span className="text-slate-600 leading-snug">{u.texto}</span>
-                </div>
-              ))}
+            <div className="px-2 space-y-1 text-xs">
+              {([
+                { icon: BookOpen, texto: "Novo módulo: Mediação Moderada em R", page: "plataforma" as Page },
+                { icon: Settings, texto: "Atualização do JASP (v0.19)", page: null },
+                { icon: Settings, texto: "Novo GPT: Gerador de Sintaxe R", page: "gpts" as Page },
+                { icon: BookOpen, texto: "Curso de Análise de Redes disponível", page: "plataforma" as Page },
+              ]).map((u, i) =>
+                u.page ? (
+                  <button
+                    key={i}
+                    onClick={() => onNavigate?.(u.page!)}
+                    className="w-full flex items-start gap-2 py-1.5 rounded-lg hover:bg-slate-50 px-1 text-left transition-colors group"
+                  >
+                    <u.icon className="w-3 h-3 text-slate-400 mt-0.5 flex-shrink-0 group-hover:text-[#6578c4] transition-colors" strokeWidth={2} />
+                    <span className="text-slate-600 leading-snug group-hover:text-[#6578c4] transition-colors">{u.texto}</span>
+                  </button>
+                ) : (
+                  <div key={i} className="flex items-start gap-2 py-1.5 px-1">
+                    <u.icon className="w-3 h-3 text-slate-400 mt-0.5 flex-shrink-0" strokeWidth={2} />
+                    <span className="text-slate-500 leading-snug">{u.texto}</span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         </div>
@@ -3774,37 +4171,114 @@ function ComunidadePage() {
 
       {/* Feed central */}
       <div className="flex-1 min-w-0">
-        {/* Composer estilo LinkedIn */}
+        {/* Composer */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 mb-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-11 h-11 rounded-full bg-[#1e3a5f] border border-white flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          {/* Inputs ocultos para arquivo */}
+          <input ref={imgInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+          <input ref={docInputRef} type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx" className="hidden" onChange={handleDocSelect} />
+
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-11 h-11 rounded-full bg-[#1e3a5f] border border-white flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
               SA
             </div>
-            <input
+            <textarea
               value={novoPost}
               onChange={(e) => setNovoPost(e.target.value)}
               placeholder="Compartilhe uma dúvida, achado ou recurso…"
-              className="flex-1 border border-slate-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-slate-400 hover:bg-slate-50 transition-colors bg-slate-50/50 placeholder:text-slate-400"
+              rows={novoPost ? 3 : 1}
+              className="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#6578c4] focus:ring-1 focus:ring-[#6578c4] hover:bg-slate-50 transition-colors bg-slate-50/50 placeholder:text-slate-400 resize-none"
             />
           </div>
+
+          {/* Preview de imagem */}
+          {postImagem && (
+            <div className="relative mb-3 ml-14 rounded-xl overflow-hidden border border-slate-200">
+              <img src={postImagem} alt="preview" className="w-full max-h-48 object-cover" />
+              <button
+                onClick={() => setPostImagem(null)}
+                className="absolute top-2 right-2 w-6 h-6 rounded-full bg-slate-900/60 flex items-center justify-center text-white hover:bg-slate-900"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Chip de documento */}
+          {postDocumento && (
+            <div className="flex items-center gap-2 ml-14 mb-3 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 w-fit max-w-full">
+              <FileText className="w-4 h-4 text-emerald-500 flex-shrink-0" strokeWidth={1.5} />
+              <span className="text-xs text-slate-700 truncate max-w-[200px]">{postDocumento}</span>
+              <button onClick={() => setPostDocumento(null)} className="text-slate-400 hover:text-slate-600 flex-shrink-0">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Tags adicionadas */}
+          {postTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 ml-14 mb-3">
+              {postTags.map((t) => (
+                <span key={t} className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full" style={{ background: "rgba(101,120,196,0.12)", color: "#6578c4" }}>
+                  #{t}
+                  <button onClick={() => setPostTags((prev) => prev.filter((x) => x !== t))} className="hover:opacity-70">
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Campo de nova tag inline */}
+          {showTagInput && (
+            <div className="flex items-center gap-2 ml-14 mb-3">
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === ",") { e.preventDefault(); adicionarTag(); }
+                  if (e.key === "Escape") { setShowTagInput(false); setTagInput(""); }
+                }}
+                placeholder="Digite uma tag e pressione Enter"
+                autoFocus
+                className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#6578c4] w-52"
+              />
+              <button onClick={adicionarTag} className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ background: "#6578c4" }}>
+                Adicionar
+              </button>
+              <button onClick={() => { setShowTagInput(false); setTagInput(""); }} className="text-xs text-slate-400 hover:text-slate-600">
+                Cancelar
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center justify-between pt-2 border-t border-slate-100">
             <div className="flex items-center gap-1">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+              <button
+                onClick={() => imgInputRef.current?.click()}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${postImagem ? "text-blue-600 bg-blue-50" : "text-slate-600 hover:bg-slate-100"}`}
+              >
                 <ImageIcon className="w-4 h-4 text-blue-500" strokeWidth={1.5} /> Imagem
               </button>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+              <button
+                onClick={() => docInputRef.current?.click()}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${postDocumento ? "text-emerald-600 bg-emerald-50" : "text-slate-600 hover:bg-slate-100"}`}
+              >
                 <FileText className="w-4 h-4 text-emerald-500" strokeWidth={1.5} /> Documento
               </button>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-                <Tag className="w-4 h-4 text-amber-500" strokeWidth={1.5} /> Tags
+              <button
+                onClick={() => setShowTagInput((v) => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${postTags.length > 0 || showTagInput ? "text-amber-600 bg-amber-50" : "text-slate-600 hover:bg-slate-100"}`}
+              >
+                <Tag className="w-4 h-4 text-amber-500" strokeWidth={1.5} /> Tags{postTags.length > 0 ? ` (${postTags.length})` : ""}
               </button>
             </div>
             <button
-              disabled={!novoPost.trim()}
-              onClick={() => setNovoPost("")}
-              className="text-xs font-semibold bg-slate-900 text-white rounded-full px-5 py-1.5 hover:bg-slate-800 transition-colors disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+              disabled={!novoPost.trim() || publicando}
+              onClick={publicar}
+              className="text-xs font-semibold text-white rounded-full px-5 py-1.5 hover:opacity-90 transition-opacity disabled:!bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+              style={{ background: "#6578c4" }}
             >
-              Publicar
+              {publicando ? "Publicando..." : "Publicar"}
             </button>
           </div>
         </div>
@@ -3824,8 +4298,8 @@ function ComunidadePage() {
         {/* Feed */}
         <div key={canalAtivo} className="space-y-3 fx-stagger">
           {postsFiltrados.map((p, idx) => {
-            const liked = likes[p.id];
-            const totalLikes = p.likes + (liked ? 1 : 0);
+            const liked = likes[p.id] ?? false;
+            const totalLikes = likesCount[p.id] ?? p.likes;
             const comOpen = comentariosAbertos[p.id];
             return (
               <article
@@ -3876,7 +4350,7 @@ function ComunidadePage() {
                   {p.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {p.tags.map((t) => (
-                        <span key={t} className="text-[11px] font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-full px-2.5 py-0.5 cursor-pointer transition-colors">
+                        <span key={t} className="text-[11px] font-medium text-[#5568b3] bg-[#6578c4]/10 hover:bg-[#6578c4]/15 rounded-full px-2.5 py-0.5 cursor-pointer transition-colors">
                           #{t}
                         </span>
                       ))}
@@ -3921,10 +4395,6 @@ function ComunidadePage() {
                       <MessageCircle className="w-[18px] h-[18px]" strokeWidth={1.5} />
                       <span className="hidden sm:inline">Comentar</span>
                     </button>
-                    <button className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-                      <Share2 className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                      <span className="hidden sm:inline">Compartilhar</span>
-                    </button>
                   </div>
 
                   {/* Comentários expandidos */}
@@ -3955,7 +4425,7 @@ function ComunidadePage() {
                       {/* Input de comentário */}
                       <div className="flex items-start gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-[#1e3a5f] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                          SA
+                          {usuario?.nome ? usuario.nome.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() : "??"}
                         </div>
                         <div className="flex-1 relative">
                           <input
@@ -3963,13 +4433,26 @@ function ComunidadePage() {
                             onChange={(e) =>
                               setComentario({ ...comentario, [p.id]: e.target.value })
                             }
+                            onKeyDown={async (e) => {
+                              if (e.key === "Enter" && comentario[p.id]?.trim() && usuario) {
+                                await comunidadeApi.createComentario({ post_id: p.id, usuario_id: usuario.id, conteudo: comentario[p.id].trim() });
+                                setComentario({ ...comentario, [p.id]: "" });
+                                refetchPosts();
+                              }
+                            }}
                             placeholder="Adicione um comentário…"
                             className="w-full border border-slate-200 rounded-full pl-4 pr-12 py-2 text-sm focus:outline-none focus:border-slate-400 bg-slate-50/50 placeholder:text-slate-400"
                           />
                           <button
                             disabled={!comentario[p.id]?.trim()}
-                            onClick={() => setComentario({ ...comentario, [p.id]: "" })}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-800 transition-colors disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+                            onClick={async () => {
+                              if (!comentario[p.id]?.trim() || !usuario) return;
+                              await comunidadeApi.createComentario({ post_id: p.id, usuario_id: usuario.id, conteudo: comentario[p.id].trim() });
+                              setComentario({ ...comentario, [p.id]: "" });
+                              refetchPosts();
+                            }}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full text-white flex items-center justify-center hover:opacity-90 transition-opacity disabled:!bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+                            style={{ background: "#6578c4" }}
                           >
                             <Send className="w-3.5 h-3.5 -rotate-45 translate-x-px" />
                           </button>
@@ -3995,13 +4478,13 @@ function ComunidadePage() {
 
 // ─── PAGE: ADMIN ──────────────────────────────────────────────────────────
 
-type AdminTab = "overview" | "assinaturas" | "receita" | "parcerias" | "editor";
+type AdminTab = "overview" | "assinaturas" | "receita" | "parcerias";
 type EditorTab = "curso" | "gpt" | "prompt" | "livro";
 
 function StatCard({ label, value, sub, icon: Icon, trend, color = "slate" }: { label: string; value: string; sub: string; icon: ElementType; trend?: string; color?: string; }) {
-  const colors: Record<string, string> = { slate: "bg-slate-50 text-slate-700", blue: "bg-blue-50 text-blue-700", emerald: "bg-emerald-50 text-emerald-700", amber: "bg-amber-50 text-amber-700" };
+  const colors: Record<string, string> = { slate: "bg-slate-50 text-slate-700", blue: "bg-[#6578c4]/10 text-[#5568b3]", emerald: "bg-emerald-50 text-emerald-700", amber: "bg-amber-50 text-amber-700" };
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
+    <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5 fx-hover-lift cursor-default">
       <div className="flex items-start justify-between mb-3">
         <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${colors[color]}`}><Icon className="w-4 h-4" strokeWidth={1.5} /></div>
         {trend && (<span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"><ArrowUpRight className="w-3 h-3" />{trend}</span>)}
@@ -4015,40 +4498,93 @@ function StatCard({ label, value, sub, icon: Icon, trend, color = "slate" }: { l
 
 function AdminPage() {
   const [tab, setTab] = useState<AdminTab>("overview");
-  const [editorTab, setEditorTab] = useState<EditorTab>("curso");
   const [assBusca, setAssBusca] = useState("");
   const [assFiltro, setAssFiltro] = useState("Todos");
-  const [assEditando, setAssEditando] = useState<number | null>(null);
+  const [assEditando, setAssEditando] = useState<string | null>(null);
+  const [metricas, setMetricas] = useState<{
+    totalAlunos: number; totalAssinaturasAtivas: number; totalParcerias: number; receitaMensal: number;
+  } | null>(null);
+  const [assRealData, setAssRealData] = useState<{
+    id: string; status: string;
+    usuarios: { nome: string | null; email: string } | null;
+    planos: { nome: string; preco_mensal: number } | null;
+    criado_em: string;
+  }[]>([]);
+  const [planosList, setPlanosList] = useState<{ id: string; nome: string }[]>([]);
+  const [acaoCarregando, setAcaoCarregando] = useState<string | null>(null);
+  const [acaoFeedback, setAcaoFeedback] = useState<{ id: string; msg: string; ok: boolean } | null>(null);
+
+  useEffect(() => {
+    adminApi.getMetricasAdmin().then((m) => setMetricas(m)).catch(() => {});
+    assinaturasApi.getAssinaturasAdmin().then(({ data }) => {
+      if (data) setAssRealData(data as typeof assRealData);
+    }).catch(() => {});
+    assinaturasApi.getPlanos().then(({ data }) => {
+      if (data) setPlanosList(data.map((p) => ({ id: p.id, nome: p.nome })));
+    }).catch(() => {});
+  }, []);
+
+  const handleCancelar = async (id: string) => {
+    setAcaoCarregando(id + "_cancelar");
+    const { error } = await assinaturasApi.cancelarAssinatura(id);
+    setAcaoCarregando(null);
+    if (!error) {
+      setAssRealData((prev) => prev.map((a) => a.id === id ? { ...a, status: "cancelada" } : a));
+      setAcaoFeedback({ id, msg: "Assinatura cancelada.", ok: true });
+    } else {
+      setAcaoFeedback({ id, msg: "Erro ao cancelar.", ok: false });
+    }
+    setTimeout(() => setAcaoFeedback(null), 3000);
+  };
+
+  const handleAlterarPlano = async (id: string, novoPlanoId: string) => {
+    setAcaoCarregando(id + "_plano");
+    const { supabase } = await import("../lib/supabase");
+    const { error } = await supabase.from("assinaturas").update({ plano_id: novoPlanoId }).eq("id", id);
+    setAcaoCarregando(null);
+    if (!error) {
+      const novoPLano = planosList.find((p) => p.id === novoPlanoId);
+      setAssRealData((prev) => prev.map((a) => a.id === id ? { ...a, planos: { ...a.planos!, nome: novoPLano?.nome ?? a.planos?.nome ?? "" } } : a));
+      setAcaoFeedback({ id, msg: "Plano alterado com sucesso.", ok: true });
+    } else {
+      setAcaoFeedback({ id, msg: "Erro ao alterar plano.", ok: false });
+    }
+    setTimeout(() => setAcaoFeedback(null), 3000);
+  };
 
   const adminTabs: { id: AdminTab; label: string; icon: ElementType }[] = [
     { id: "overview", label: "Visão Geral", icon: LayoutDashboard },
     { id: "assinaturas", label: "Assinaturas", icon: CreditCard },
     { id: "receita", label: "Receita", icon: TrendingUp },
     { id: "parcerias", label: "Parcerias", icon: Handshake },
-    { id: "editor", label: "Editor de Conteúdo", icon: Edit3 },
   ];
 
-  const assFiltered = assinaturasData.filter((a) => (assFiltro === "Todos" || a.plano === assFiltro || a.status === assFiltro) && a.nome.toLowerCase().includes(assBusca.toLowerCase()));
-  const totalAtivos = assinaturasData.filter((a) => a.status === "Ativo").length;
-  const receitaMes = receitaData[receitaData.length - 1].receita;
+  const assFiltered = assRealData.filter((a) => {
+    const nome = a.usuarios?.nome ?? "";
+    const status = a.status;
+    const plano = a.planos?.nome ?? "";
+    return (assFiltro === "Todos" || plano === assFiltro || status === assFiltro) && nome.toLowerCase().includes(assBusca.toLowerCase());
+  });
+  const totalAtivos = metricas?.totalAssinaturasAtivas ?? assinaturasData.filter((a) => a.status === "Ativo").length;
+  const receitaMes = metricas?.receitaMensal ?? receitaData[receitaData.length - 1].receita;
   const acessosHoje = acessosData[acessosData.length - 2].acessos;
-  const parceirosAtivos = parceirosAdmin.filter((p) => p.status === "Ativo").length;
+  const parceirosAtivos = metricas?.totalParcerias ?? parceirosAdmin.filter((p) => p.status === "Ativo").length;
 
   const statusBadge = (s: string) => {
     if (s === "Ativo") return "bg-emerald-50 text-emerald-700 border border-emerald-200";
     if (s === "Pausado") return "bg-amber-50 text-amber-700 border border-amber-200";
     if (s === "Cancelado") return "bg-rose-50 text-rose-700 border border-rose-200";
-    if (s === "Em Negociação") return "bg-blue-50 text-blue-700 border border-blue-200";
+    if (s === "Em Negociação") return "bg-[#6578c4]/10 text-[#5568b3] border border-[#6578c4]/30";
     return "bg-slate-100 text-slate-600";
   };
-  const planoBadge = (p: string) => p === "Premium" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700";
+  const planoBadge = (p: string) => p === "Consultoria" ? "bg-[#c9a961]/20 text-[#8a6210] border border-[#c9a961]/30" : "bg-slate-100 text-slate-700";
 
   return (
     <div>
       {/* Tab bar */}
-      <div className="flex items-center gap-0.5 overflow-x-auto -mx-1 px-1 mb-6 border-b border-slate-200">
+      <div className="flex items-center gap-0.5 overflow-x-auto -mx-1 px-1 mb-6 border-b border-[#6578c4]/15">
         {adminTabs.map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${tab === t.id ? "border-slate-800 text-slate-800" : "border-transparent text-slate-400 hover:text-slate-600"}`}>
+          <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${tab === t.id ? "border-[#6578c4] text-[#6578c4]" : "border-transparent text-slate-400 hover:text-slate-600"}`}>
             <t.icon className="w-4 h-4" strokeWidth={1.5} />
             <span className="hidden sm:inline">{t.label}</span>
           </button>
@@ -4058,7 +4594,7 @@ function AdminPage() {
       {/* OVERVIEW */}
       {tab === "overview" && (
         <div className="space-y-6 fx-fade">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 fx-stagger-grid">
             <StatCard label="Assinantes Ativos" value={String(totalAtivos)} sub="dos últimos 30 dias" icon={UserCheck} trend="+12%" color="blue" />
             <StatCard label="Receita Mensal" value={`R$ ${receitaMes.toLocaleString("pt-BR")}`} sub="Mai 2026" icon={DollarSign} trend="+13%" color="emerald" />
             <StatCard label="Acessos Hoje" value={String(acessosHoje)} sub="pico às 18h" icon={Activity} trend="+8%" color="amber" />
@@ -4075,15 +4611,15 @@ function AdminPage() {
                 <AreaChart data={receitaData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="recGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1e3a5f" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#1e3a5f" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#6578c4" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#6578c4" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`} />
                   <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0", background: "white" }} formatter={(v: number) => [`R$ ${v.toLocaleString("pt-BR")}`, "Receita"]} />
-                  <Area type="monotone" dataKey="receita" stroke="#1e3a5f" strokeWidth={2} fill="url(#recGrad)" />
+                  <Area type="monotone" dataKey="receita" stroke="#6578c4" strokeWidth={2} fill="url(#recGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -4119,14 +4655,14 @@ function AdminPage() {
                   <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0", background: "white" }} formatter={(v: number) => [v, "Acessos"]} />
-                  <Bar dataKey="acessos" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="acessos" fill="#6578c4" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
               <div className="text-sm font-semibold text-slate-800 mb-4">Atividade Recente</div>
-              <div className="space-y-3">
+              <div className="space-y-3 fx-stagger-fast">
                 {atividadeRecente.map((a, i) => {
                   const isPos = a.tipo === "assinatura" || a.tipo === "parceria";
                   return (
@@ -4154,12 +4690,12 @@ function AdminPage() {
         <div className="space-y-4 fx-fade">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <BrandSearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6578c4]" />
               <input value={assBusca} onChange={(e) => setAssBusca(e.target.value)} className="pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 w-full bg-white/70" placeholder="Buscar assinante..." />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto">
-              {["Todos", "Premium", "Pro", "Ativo", "Pausado", "Cancelado"].map((f) => (
-                <button key={f} onClick={() => setAssFiltro(f)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${assFiltro === f ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{f}</button>
+              {["Todos", "Essencial", "Consultoria", "Ativo", "Pausado", "Cancelado"].map((f) => (
+                <button key={f} onClick={() => setAssFiltro(f)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${assFiltro === f ? "text-white" : "text-slate-500 hover:text-[#6578c4]"}`} style={assFiltro === f ? { background: "#6578c4", boxShadow: "0 2px 8px rgba(101,120,196,0.30)" } : { background: "#f9f3dd" }}>{f}</button>
               ))}
             </div>
           </div>
@@ -4181,26 +4717,53 @@ function AdminPage() {
             <div className="hidden sm:grid grid-cols-12 gap-4 px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               <div className="col-span-4">Assinante</div><div className="col-span-2">Plano</div><div className="col-span-2">Desde</div><div className="col-span-2">Valor/mês</div><div className="col-span-2">Status</div>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 fx-stagger-fast">
               {assFiltered.map((a) => (
                 <div key={a.id} className="px-4 py-3 hover:bg-slate-50/60 transition-colors sm:grid sm:grid-cols-12 sm:gap-4 sm:items-center flex flex-col gap-1.5">
                   <div className="sm:col-span-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 flex-shrink-0">{getInitials(a.nome)}</div>
-                    <div className="min-w-0"><div className="text-sm font-medium text-slate-800 truncate">{a.nome}</div><div className="text-[11px] text-slate-400 truncate">{a.email}</div></div>
+                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 flex-shrink-0">
+                      {(a.usuarios?.nome ?? "?").split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-slate-800 truncate">{a.usuarios?.nome ?? "—"}</div>
+                      <div className="text-[11px] text-slate-400 truncate">{a.usuarios?.email ?? "—"}</div>
+                    </div>
                   </div>
-                  <div className="sm:col-span-2"><span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${planoBadge(a.plano)}`}>{a.plano}</span></div>
-                  <div className="sm:col-span-2 text-xs text-slate-500">{a.inicio}</div>
-                  <div className="sm:col-span-2 text-sm font-semibold text-slate-700">R$ {a.valor}</div>
+                  <div className="sm:col-span-2"><span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${planoBadge(a.planos?.nome ?? "")}`}>{a.planos?.nome ?? "—"}</span></div>
+                  <div className="sm:col-span-2 text-xs text-slate-500">{new Date(a.criado_em).toLocaleDateString("pt-BR")}</div>
+                  <div className="sm:col-span-2 text-sm font-semibold text-slate-700">R$ {Number(a.planos?.preco_mensal ?? 0).toFixed(2).replace(".", ",")}</div>
                   <div className="sm:col-span-2 flex items-center justify-between">
-                    <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusBadge(a.status)}`}>{a.status}</span>
+                    <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusBadge(a.status === "ativa" ? "Ativo" : a.status === "cancelada" ? "Cancelado" : a.status)}`}>{a.status}</span>
                     <button onClick={() => setAssEditando(assEditando === a.id ? null : a.id)} className="text-slate-400 hover:text-slate-700 p-1 transition-colors"><MoreHorizontal className="w-4 h-4" /></button>
                   </div>
                   {assEditando === a.id && (
-                    <div className="sm:col-span-12 flex flex-wrap gap-2 pt-2 border-t border-slate-100 fx-rise">
-                      <button className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors">Alterar plano</button>
-                      <button className="text-xs px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors">Pausar</button>
-                      <button className="text-xs px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors">Cancelar</button>
-                      <button className="text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Enviar e-mail</button>
+                    <div className="sm:col-span-12 space-y-2 pt-2 border-t border-slate-100 fx-rise">
+                      {acaoFeedback?.id === a.id && (
+                        <p className={`text-xs px-3 py-1.5 rounded-lg ${acaoFeedback.ok ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>{acaoFeedback.msg}</p>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        <select
+                          className="text-xs px-2 py-1.5 rounded-lg border border-[#6578c4]/30 text-[#5568b3] bg-[#6578c4]/5 focus:outline-none"
+                          defaultValue=""
+                          onChange={(e) => { if (e.target.value) handleAlterarPlano(a.id, e.target.value); }}
+                        >
+                          <option value="" disabled>Alterar plano...</option>
+                          {planosList.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
+                        </select>
+                        <button
+                          onClick={() => handleCancelar(a.id)}
+                          disabled={acaoCarregando === a.id + "_cancelar" || a.status === "cancelada"}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors disabled:opacity-50"
+                        >
+                          {acaoCarregando === a.id + "_cancelar" ? "Cancelando..." : "Cancelar"}
+                        </button>
+                        <a
+                          href={`mailto:${a.usuarios?.email ?? ""}`}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                        >
+                          Enviar e-mail
+                        </a>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -4230,8 +4793,8 @@ function AdminPage() {
                 <YAxis yAxisId="left" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`} />
                 <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0", background: "white" }} />
-                <Line yAxisId="left" type="monotone" dataKey="receita" stroke="#1e3a5f" strokeWidth={2.5} dot={{ r: 4, fill: "#1e3a5f" }} name="Receita (R$)" />
-                <Line yAxisId="right" type="monotone" dataKey="assinaturas" stroke="#2563eb" strokeWidth={2} dot={{ r: 4, fill: "#2563eb" }} strokeDasharray="5 3" name="Assinantes" />
+                <Line yAxisId="left" type="monotone" dataKey="receita" stroke="#0a0a3a" strokeWidth={2.5} dot={{ r: 4, fill: "#0a0a3a" }} name="Receita (R$)" />
+                <Line yAxisId="right" type="monotone" dataKey="assinaturas" stroke="#6578c4" strokeWidth={2} dot={{ r: 4, fill: "#6578c4" }} strokeDasharray="5 3" name="Assinantes" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -4240,7 +4803,7 @@ function AdminPage() {
             <div className="grid grid-cols-5 gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               <div>Mês</div><div>Receita</div><div>Assinantes</div><div>Variação</div><div>Status</div>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 fx-stagger-fast">
               {[...receitaData].reverse().map((r, i) => {
                 const prev = receitaData[receitaData.length - 2 - i];
                 const pct = prev ? (((r.receita - prev.receita) / prev.receita) * 100).toFixed(1) : null;
@@ -4250,7 +4813,7 @@ function AdminPage() {
                     <div className="text-sm font-semibold text-slate-800">R$ {r.receita.toLocaleString("pt-BR")}</div>
                     <div className="text-sm text-slate-600">{r.assinaturas}</div>
                     <div className={`text-sm font-medium ${pct && Number(pct) > 0 ? "text-emerald-600" : "text-slate-400"}`}>{pct ? `+${pct}%` : "—"}</div>
-                    <div><span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${i === 0 ? "bg-blue-50 text-blue-700 border border-blue-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>{i === 0 ? "Atual" : "Concluído"}</span></div>
+                    <div><span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${i === 0 ? "bg-[#6578c4]/10 text-[#5568b3] border border-[#6578c4]/30" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>{i === 0 ? "Atual" : "Concluído"}</span></div>
                   </div>
                 );
               })}
@@ -4273,7 +4836,7 @@ function AdminPage() {
             <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               <div className="col-span-3">Instituição</div><div className="col-span-2">Tipo</div><div className="col-span-2">Plano · Vagas</div><div className="col-span-2">Receita</div><div className="col-span-2">Desde</div><div className="col-span-1">Status</div>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 fx-stagger-fast">
               {parceirosAdmin.map((p) => (
                 <div key={p.id} className="px-5 py-4 hover:bg-slate-50/60 transition-colors sm:grid sm:grid-cols-12 sm:gap-4 sm:items-center flex flex-col gap-1.5">
                   <div className="sm:col-span-3"><div className="text-sm font-semibold text-slate-800">{p.nome}</div><div className="text-[11px] text-slate-400">{p.cidade}</div></div>
@@ -4288,89 +4851,526 @@ function AdminPage() {
           </div>
 
           <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
-            <div className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2"><PlusCircle className="w-4 h-4 text-blue-600" strokeWidth={1.5} /> Nova Parceria</div>
+            <div className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2"><PlusCircle className="w-4 h-4 text-[#6578c4]" strokeWidth={1.5} /> Nova Parceria</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {["Nome da Instituição", "Tipo", "Cidade / Estado", "E-mail de Contato", "Vagas"].map((lbl) => (
                 <div key={lbl}><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">{lbl}</label><input type={lbl === "Vagas" ? "number" : "text"} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder={lbl} /></div>
               ))}
               <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Plano</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-slate-400"><option>Pro</option><option>Premium</option><option>Negociar</option></select></div>
             </div>
-            <button className="mt-4 flex items-center gap-2 bg-slate-900 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"><Save className="w-4 h-4" /> Salvar Parceria</button>
+            <button className="mt-4 flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> Salvar Parceria</button>
           </div>
         </div>
       )}
 
-      {/* EDITOR */}
-      {tab === "editor" && (
-        <div className="fx-fade">
-          <div className="flex items-center gap-1 overflow-x-auto mb-5 bg-slate-100 p-1 rounded-xl w-fit">
-            {(["curso", "gpt", "prompt", "livro"] as EditorTab[]).map((et) => (
-              <button key={et} onClick={() => setEditorTab(et)} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${editorTab === et ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
-                {et === "gpt" ? "GPT" : et.charAt(0).toUpperCase() + et.slice(1)}
-              </button>
-            ))}
+    </div>
+  );
+}
+
+// ─── EDITOR PAGE ────────────────────────────────────────────────────────────
+
+function CategoriaSelector({
+  cats,
+  setCats,
+  placeholder = "Nova categoria...",
+}: {
+  cats: string[];
+  setCats: React.Dispatch<React.SetStateAction<string[]>>;
+  placeholder?: string;
+}) {
+  const [nova, setNova] = useState("");
+  const adicionar = () => {
+    const c = nova.trim();
+    if (c && !cats.includes(c)) setCats((p) => [...p, c]);
+    setNova("");
+  };
+  return (
+    <div>
+      <div className="flex gap-2">
+        <select className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white">
+          {cats.map((c) => <option key={c}>{c}</option>)}
+        </select>
+        <div className="flex gap-1 flex-1">
+          <input
+            value={nova}
+            onChange={(e) => setNova(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && adicionar()}
+            className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white"
+            placeholder={placeholder}
+          />
+          <button onClick={adicionar} className="px-3 py-2 text-white rounded-lg text-sm hover:opacity-90 transition-opacity flex-shrink-0" style={{ background: "#6578c4" }}>
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+      {cats.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {cats.map((c) => (
+            <span key={c} className="text-[11px] bg-slate-100 text-slate-600 border border-slate-200 rounded-full px-2.5 py-0.5 flex items-center gap-1">
+              {c}
+              <button onClick={() => setCats((p) => p.filter((x) => x !== c))} className="hover:text-rose-600 transition-colors"><X className="w-2.5 h-2.5" /></button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ImageUploadField({
+  label,
+  url,
+  setUrl,
+  inputRef,
+  height = "h-36",
+}: {
+  label: string;
+  url: string | null;
+  setUrl: (v: string | null) => void;
+  inputRef: React.RefObject<HTMLInputElement>;
+  height?: string;
+}) {
+  return (
+    <div>
+      <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">{label}</label>
+      {url ? (
+        <div className={`relative ${height} rounded-xl overflow-hidden border border-slate-200 group`}>
+          <img src={url} alt={label} className="w-full h-full object-cover" />
+          <button
+            onClick={() => { setUrl(null); if (inputRef.current) inputRef.current.value = ""; }}
+            className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-slate-600 hover:text-rose-600 rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => inputRef.current?.click()}
+            className="absolute bottom-2 right-2 bg-white/80 backdrop-blur-sm text-slate-600 hover:text-slate-900 rounded-lg px-2.5 py-1.5 text-xs font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Upload className="w-3 h-3" /> Trocar
+          </button>
+          <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setUrl(URL.createObjectURL(f)); }} />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className={`flex flex-col items-center justify-center gap-2 ${height} w-full border-2 border-dashed border-slate-300 rounded-xl text-slate-400 hover:border-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all`}
+        >
+          <ImageIcon className="w-6 h-6" strokeWidth={1.5} />
+          <span className="text-sm">Clique para enviar imagem</span>
+          <span className="text-xs text-slate-400">PNG, JPG, WEBP</span>
+          <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setUrl(URL.createObjectURL(f)); }} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ─── SELETOR DE ALUNOS ─────────────────────────────────────────────────────
+function SeletorAlunos({
+  selecionados,
+  setSelecionados,
+}: {
+  selecionados: number[];
+  setSelecionados: (ids: number[]) => void;
+}) {
+  const [busca, setBusca] = useState("");
+  const ativos = assinaturasData.filter((a) => a.status !== "Cancelado");
+  const filtrados = ativos.filter((a) =>
+    a.nome.toLowerCase().includes(busca.toLowerCase())
+  );
+  const toggle = (id: number) =>
+    setSelecionados(
+      selecionados.includes(id)
+        ? selecionados.filter((s) => s !== id)
+        : [...selecionados, id]
+    );
+  const todosIds = filtrados.map((a) => a.id);
+  const todosMarcados =
+    todosIds.length > 0 && todosIds.every((id) => selecionados.includes(id));
+
+  return (
+    <div className="mt-2 border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+      <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-2 bg-slate-50">
+        <BrandSearchIcon className="w-3.5 h-3.5 text-[#6578c4] shrink-0" />
+        <input
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          className="text-sm outline-none w-full bg-transparent placeholder:text-slate-400"
+          placeholder="Buscar aluno por nome..."
+        />
+        {busca && (
+          <button type="button" onClick={() => setBusca("")} className="text-slate-400 hover:text-slate-600">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+      <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <span className="text-xs text-slate-500">
+          {selecionados.length === 0
+            ? "Nenhum aluno selecionado"
+            : `${selecionados.length} aluno${selecionados.length > 1 ? "s" : ""} selecionado${selecionados.length > 1 ? "s" : ""}`}
+        </span>
+        <button
+          type="button"
+          onClick={() => setSelecionados(todosMarcados ? [] : todosIds)}
+          className="text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors"
+        >
+          {todosMarcados ? "Desmarcar todos" : "Selecionar todos"}
+        </button>
+      </div>
+      <div className="max-h-52 overflow-y-auto divide-y divide-slate-50">
+        {filtrados.length === 0 ? (
+          <p className="text-xs text-slate-400 text-center py-5">Nenhum aluno encontrado</p>
+        ) : (
+          filtrados.map((aluno) => (
+            <label
+              key={aluno.id}
+              className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors"
+            >
+              <input
+                type="checkbox"
+                checked={selecionados.includes(aluno.id)}
+                onChange={() => toggle(aluno.id)}
+                className="rounded border-slate-300 accent-slate-800"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-slate-800 font-medium truncate">{aluno.nome}</p>
+                <p className="text-xs text-slate-400 truncate">{aluno.email}</p>
+              </div>
+              <span
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                  aluno.plano === "Consultoria"
+                    ? "bg-violet-100 text-violet-700"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {aluno.plano}
+              </span>
+            </label>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EditorPage() {
+  const [editorTab, setEditorTab] = useState<EditorTab>("curso");
+  const [salvando, setSalvando] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState<{ tipo: "ok" | "erro"; texto: string } | null>(null);
+
+  // ── Estado dos formulários ──
+  const [cursoForm, setCursoForm] = useState({ titulo: "", descricao: "", nivel: "Iniciante", plano_minimo: "essencial" as "essencial" | "consultoria" });
+  const [gptForm, setGptForm] = useState({ titulo: "", descricao: "", url: "", categoria: "" });
+  const [promptForm, setPromptForm] = useState({ titulo: "", descricao: "", conteudo: "", categoria: "" });
+  const [livroForm, setLivroForm] = useState({ titulo: "", area: "" });
+
+  const mostrarFeedback = (tipo: "ok" | "erro", texto: string) => {
+    setFeedbackMsg({ tipo, texto });
+    setTimeout(() => setFeedbackMsg(null), 3500);
+  };
+
+  const salvarCurso = async () => {
+    if (!cursoForm.titulo.trim()) { mostrarFeedback("erro", "Título obrigatório."); return; }
+    setSalvando(true);
+    const plano_minimo = visibilidadeCurso === "consultoria" ? "consultoria" : "essencial" as "essencial" | "consultoria";
+    const { error } = await cursosApi.createCurso({
+      titulo: cursoForm.titulo,
+      descricao: cursoForm.descricao || null,
+      nivel: cursoForm.nivel as "Iniciante" | "Intermediário" | "Avançado",
+      plano_minimo,
+    });
+    setSalvando(false);
+    if (error) { mostrarFeedback("erro", "Erro ao salvar curso."); return; }
+    mostrarFeedback("ok", "Curso salvo com sucesso!");
+    setCursoForm({ titulo: "", descricao: "", nivel: "Iniciante", plano_minimo: "essencial" });
+  };
+
+  const salvarGPT = async () => {
+    if (!gptForm.titulo.trim()) { mostrarFeedback("erro", "Nome obrigatório."); return; }
+    setSalvando(true);
+    const plano_minimo = visibilidadeGPT === "consultoria" ? "consultoria" : "essencial" as "essencial" | "consultoria";
+    const { error } = await gptsApi.createGpt({
+      titulo: gptForm.titulo,
+      descricao: gptForm.descricao || null,
+      url: gptForm.url || null,
+      categoria: gptForm.categoria || catsCursoPrimeiroItem(catsGPT),
+      plano_minimo,
+    });
+    setSalvando(false);
+    if (error) { mostrarFeedback("erro", "Erro ao salvar GPT."); return; }
+    mostrarFeedback("ok", "GPT salvo com sucesso!");
+    setGptForm({ titulo: "", descricao: "", url: "", categoria: "" });
+  };
+
+  const salvarPrompt = async () => {
+    if (!promptForm.titulo.trim() || !promptForm.conteudo.trim()) { mostrarFeedback("erro", "Título e conteúdo obrigatórios."); return; }
+    setSalvando(true);
+    const { error } = await promptsApi.createPrompt({
+      titulo: promptForm.titulo,
+      descricao: promptForm.descricao || null,
+      conteudo: promptForm.conteudo,
+      categoria: promptForm.categoria || catsCursoPrimeiroItem(catsPrompt),
+    });
+    setSalvando(false);
+    if (error) { mostrarFeedback("erro", "Erro ao salvar prompt."); return; }
+    mostrarFeedback("ok", "Prompt salvo com sucesso!");
+    setPromptForm({ titulo: "", descricao: "", conteudo: "", categoria: "" });
+  };
+
+  const salvarLivro = async () => {
+    if (!livroForm.titulo.trim()) { mostrarFeedback("erro", "Título obrigatório."); return; }
+    setSalvando(true);
+    const { error } = await livrosApi.createLivro({
+      titulo: livroForm.titulo,
+      area: livroForm.area || null,
+    });
+    setSalvando(false);
+    if (error) { mostrarFeedback("erro", "Erro ao salvar livro."); return; }
+    mostrarFeedback("ok", "Livro salvo com sucesso!");
+    setLivroForm({ titulo: "", area: "" });
+  };
+
+  // categorias expansíveis por tipo
+  const [catsCurso, setCatsCurso] = useState(["Estatística","Metodologia","Escrita Científica","Psicometria","Pesquisa Qualitativa","Ferramentas","Carreira"]);
+  const [catsGPT, setCatsGPT] = useState(["Análise","Metodologia","Escrita","Produtividade"]);
+  const [catsPrompt, setCatsPrompt] = useState(["Escrita","Análise","Metodologia","Submissão","Revisão"]);
+  const [catsLivro, setCatsLivro] = useState(["quantitativa","qualitativa","psicometria","escrita","filosofia","ia-pesquisa"]);
+  const catsCursoPrimeiroItem = (cats: string[]) => cats[0] ?? null;
+
+  // imagens
+  const [capaCurso, setCapaCurso] = useState<string | null>(null);
+  const [capaGPT, setCapaGPT] = useState<string | null>(null);
+  const [capaLivro, setCapaLivro] = useState<string | null>(null);
+
+  // visibilidade e seleção de alunos
+  const [visibilidadeCurso, setVisibilidadeCurso] = useState("todos");
+  const [visibilidadeGPT, setVisibilidadeGPT] = useState("todos");
+  const [visibilidadePrompt, setVisibilidadePrompt] = useState("todos");
+  const [alunosCurso, setAlunosCurso] = useState<number[]>([]);
+  const [alunosGPT, setAlunosGPT] = useState<number[]>([]);
+  const [alunosPrompt, setAlunosPrompt] = useState<number[]>([]);
+
+  const capaCursoRef = useRef<HTMLInputElement>(null);
+  const capaGPTRef = useRef<HTMLInputElement>(null);
+  const capaLivroRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+  const materialCursoRef = useRef<HTMLInputElement>(null);
+  const materialPromptRef = useRef<HTMLInputElement>(null);
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">{children}</label>
+  );
+  const Input = ({ placeholder, type = "text", value, onChange }: { placeholder: string; type?: string; value?: string; onChange?: (v: string) => void }) => (
+    <input type={type} value={value ?? ""} onChange={(e) => onChange?.(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder={placeholder} />
+  );
+  const VisibilidadeField = ({
+    vis, setVis, alunos, setAlunos,
+  }: {
+    vis: string; setVis: (v: string) => void;
+    alunos: number[]; setAlunos: (ids: number[]) => void;
+  }) => (
+    <div className="sm:col-span-2">
+      <Label>Visibilidade</Label>
+      <select
+        value={vis}
+        onChange={(e) => setVis(e.target.value)}
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white"
+      >
+        <option value="todos">Público (todos os alunos)</option>
+        <option value="consultoria">Apenas Consultoria</option>
+        <option value="especificos">Alunos específicos</option>
+      </select>
+      {vis === "especificos" && (
+        <SeletorAlunos selecionados={alunos} setSelecionados={setAlunos} />
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-5">
+      {/* Tab selector */}
+      <div className="flex items-center gap-1 overflow-x-auto bg-slate-100 p-1 rounded-xl w-fit">
+        {(["curso", "gpt", "prompt", "livro"] as EditorTab[]).map((et) => (
+          <button key={et} onClick={() => setEditorTab(et)} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${editorTab === et ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
+            {et === "gpt" ? "GPT" : et.charAt(0).toUpperCase() + et.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* ── CURSO ── */}
+      {editorTab === "curso" && (
+        <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-6 space-y-5 fx-fade">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <BookOpen className="w-4 h-4 text-slate-600" strokeWidth={1.5} />
+            Adicionar / Editar Curso
           </div>
 
-          {editorTab === "curso" && (
-            <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5 space-y-4">
-              <div className="text-sm font-semibold text-slate-800 flex items-center gap-2"><BookOpen className="w-4 h-4 text-slate-600" strokeWidth={1.5} /> Adicionar / Editar Curso</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2"><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Título do Curso</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="Ex: Análise de Mediação em R" /></div>
-                <div className="sm:col-span-2"><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Descrição</label><textarea rows={3} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white" placeholder="Descrição breve do conteúdo e objetivos do curso..." /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Categoria</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white">{["Estatística","Metodologia","Escrita Científica","Psicometria","Qualitativa","Ferramentas","Carreira"].map((c) => <option key={c}>{c}</option>)}</select></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Nível</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white"><option>Iniciante</option><option>Intermediário</option><option>Avançado</option></select></div>
-                {["Instrutor", "Duração Total", "Nº de Aulas", "URL da Capa (Unsplash)"].map((lbl) => (
-                  <div key={lbl}><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">{lbl}</label><input type={lbl === "Nº de Aulas" ? "number" : "text"} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder={lbl} /></div>
-                ))}
-              </div>
-              <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-                <button className="flex items-center gap-2 bg-slate-900 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"><Save className="w-4 h-4" /> Salvar Curso</button>
-                <button className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-sm font-medium transition-colors"><Upload className="w-4 h-4" /> Importar JSON</button>
-              </div>
-            </div>
-          )}
+          <ImageUploadField label="Foto / Capa do Curso" url={capaCurso} setUrl={setCapaCurso} inputRef={capaCursoRef} />
 
-          {editorTab === "gpt" && (
-            <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5 space-y-4">
-              <div className="text-sm font-semibold text-slate-800 flex items-center gap-2"><Sparkles className="w-4 h-4 text-blue-600" strokeWidth={1.5} /> Adicionar / Editar GPT</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Nome do GPT</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="Ex: Analista Estatístico" /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Categoria</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white">{["Análise","Metodologia","Escrita"].map((c) => <option key={c}>{c}</option>)}</select></div>
-                <div className="sm:col-span-2"><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Descrição</label><textarea rows={2} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white" placeholder="O que esse GPT faz..." /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Link (ChatGPT)</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="https://chat.openai.com/g/..." /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Gradiente do ícone</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white">{["from-blue-500 to-indigo-600","from-emerald-500 to-teal-600","from-rose-500 to-pink-600","from-violet-500 to-purple-600","from-amber-500 to-orange-600"].map((c) => <option key={c}>{c}</option>)}</select></div>
-              </div>
-              <button className="flex items-center gap-2 bg-slate-900 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"><Save className="w-4 h-4" /> Salvar GPT</button>
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2"><Label>Título do Curso</Label><Input placeholder="Ex: Análise de Mediação em R" value={cursoForm.titulo} onChange={(v) => setCursoForm((f) => ({ ...f, titulo: v }))} /></div>
+            <div className="sm:col-span-2"><Label>Descrição</Label><textarea rows={3} value={cursoForm.descricao} onChange={(e) => setCursoForm((f) => ({ ...f, descricao: e.target.value }))} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white" placeholder="Descrição breve do conteúdo e objetivos do curso..." /></div>
 
-          {editorTab === "prompt" && (
-            <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5 space-y-4">
-              <div className="text-sm font-semibold text-slate-800 flex items-center gap-2"><FileText className="w-4 h-4 text-emerald-600" strokeWidth={1.5} /> Adicionar / Editar Prompt</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Título</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="Ex: Introdução com gancho científico" /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Categoria</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white">{["Escrita","Análise","Metodologia","Submissão"].map((c) => <option key={c}>{c}</option>)}</select></div>
-                <div className="sm:col-span-2"><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Descrição breve</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="O que esse prompt produz..." /></div>
-                <div className="sm:col-span-2"><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Texto do Prompt</label><textarea rows={5} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white font-mono" placeholder="Use [VARIÁVEL] para campos que o usuário deve preencher..." /></div>
-              </div>
-              <button className="flex items-center gap-2 bg-slate-900 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"><Save className="w-4 h-4" /> Salvar Prompt</button>
+            <div className="sm:col-span-2">
+              <Label>Categoria</Label>
+              <CategoriaSelector cats={catsCurso} setCats={setCatsCurso} placeholder="Nova categoria de curso..." />
             </div>
-          )}
 
-          {editorTab === "livro" && (
-            <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5 space-y-4">
-              <div className="text-sm font-semibold text-slate-800 flex items-center gap-2"><BookMarked className="w-4 h-4 text-rose-600" strokeWidth={1.5} /> Adicionar / Editar Livro</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2"><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Título</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="Ex: Principles of Structural Equation Modeling" /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Autor</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="Nome do(s) autor(es)" /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Editora</label><input className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="Ex: Guilford Press" /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Ano</label><input type="number" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder="2024" /></div>
-                <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Categoria</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white">{["quantitativa","qualitativa","psicometria","escrita","filosofia","ia-pesquisa"].map((c) => <option key={c}>{c}</option>)}</select></div>
-                <div className="sm:col-span-2"><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Contexto / Descrição</label><textarea rows={3} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white" placeholder="Breve descrição do livro e por que é referência..." /></div>
-              </div>
-              <button className="flex items-center gap-2 bg-slate-900 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"><Save className="w-4 h-4" /> Salvar Livro</button>
-            </div>
+            <div><Label>Nível</Label><select value={cursoForm.nivel} onChange={(e) => setCursoForm((f) => ({ ...f, nivel: e.target.value }))} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white"><option>Iniciante</option><option>Intermediário</option><option>Avançado</option></select></div>
+            <div><Label>URL personalizada</Label><Input placeholder="ex: analise-mediacao-r" /></div>
+            <VisibilidadeField vis={visibilidadeCurso} setVis={setVisibilidadeCurso} alunos={alunosCurso} setAlunos={setAlunosCurso} />
+          </div>
+
+          <div>
+            <Label>Vídeos das Aulas</Label>
+            <p className="text-xs text-slate-400 mb-2">A duração de cada aula é detectada automaticamente do vídeo enviado.</p>
+            <button type="button" onClick={() => videoRef.current?.click()} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-xl text-sm text-slate-500 hover:border-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all w-full justify-center">
+              <Upload className="w-4 h-4" /> Enviar vídeos das aulas (MP4, MOV, MKV...)
+              <input ref={videoRef} type="file" accept="video/*" multiple className="hidden" />
+            </button>
+          </div>
+
+          <div>
+            <Label>Materiais de Apoio</Label>
+            <button type="button" onClick={() => materialCursoRef.current?.click()} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-xl text-sm text-slate-500 hover:border-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all w-full justify-center">
+              <FileText className="w-4 h-4" /> Enviar arquivos de apoio (PDF, DOCX, PPTX, ZIP...)
+              <input ref={materialCursoRef} type="file" accept=".pdf,.doc,.docx,.zip,.pptx,.xlsx" multiple className="hidden" />
+            </button>
+          </div>
+
+          {feedbackMsg && editorTab === "curso" && (
+            <p className={`text-xs font-semibold flex items-center gap-1 ${feedbackMsg.tipo === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+              {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
+            </p>
           )}
+          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <button onClick={salvarCurso} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar Curso"}</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── GPT ── */}
+      {editorTab === "gpt" && (
+        <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-6 space-y-5 fx-fade">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <Sparkles className="w-4 h-4 text-[#6578c4]" strokeWidth={1.5} />
+            Adicionar / Editar GPT
+          </div>
+
+          <ImageUploadField label="Ícone / Imagem do GPT (opcional)" url={capaGPT} setUrl={setCapaGPT} inputRef={capaGPTRef} height="h-28" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><Label>Nome do GPT</Label><Input placeholder="Ex: Analista Estatístico" value={gptForm.titulo} onChange={(v) => setGptForm((f) => ({ ...f, titulo: v }))} /></div>
+            <div><Label>URL personalizada</Label><Input placeholder="ex: analista-estatistico" /></div>
+            <div className="sm:col-span-2">
+              <Label>Categoria</Label>
+              <CategoriaSelector cats={catsGPT} setCats={setCatsGPT} placeholder="Nova categoria de GPT..." />
+            </div>
+            <div className="sm:col-span-2"><Label>Descrição</Label><textarea rows={3} value={gptForm.descricao} onChange={(e) => setGptForm((f) => ({ ...f, descricao: e.target.value }))} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white" placeholder="O que esse GPT faz e para quem é útil..." /></div>
+            <div className="sm:col-span-2"><Label>Link do GPT (ChatGPT)</Label><Input placeholder="https://chat.openai.com/g/g-..." value={gptForm.url} onChange={(v) => setGptForm((f) => ({ ...f, url: v }))} /></div>
+            <div>
+              <Label>Cor do ícone</Label>
+              <select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white">
+                {[
+                  ["Azul → Índigo", "from-blue-500 to-indigo-600"],
+                  ["Verde → Teal", "from-emerald-500 to-teal-600"],
+                  ["Rosa → Pink", "from-rose-500 to-pink-600"],
+                  ["Violeta → Roxo", "from-violet-500 to-purple-600"],
+                  ["Âmbar → Laranja", "from-amber-500 to-orange-600"],
+                ].map(([nome, val]) => <option key={val} value={val}>{nome}</option>)}
+              </select>
+            </div>
+            <VisibilidadeField vis={visibilidadeGPT} setVis={setVisibilidadeGPT} alunos={alunosGPT} setAlunos={setAlunosGPT} />
+          </div>
+
+          {feedbackMsg && editorTab === "gpt" && (
+            <p className={`text-xs font-semibold flex items-center gap-1 ${feedbackMsg.tipo === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+              {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
+            </p>
+          )}
+          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <button onClick={salvarGPT} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar GPT"}</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── PROMPT ── */}
+      {editorTab === "prompt" && (
+        <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-6 space-y-5 fx-fade">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <FileText className="w-4 h-4 text-emerald-600" strokeWidth={1.5} />
+            Adicionar / Editar Prompt
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><Label>Título</Label><Input placeholder="Ex: Introdução com gancho científico" value={promptForm.titulo} onChange={(v) => setPromptForm((f) => ({ ...f, titulo: v }))} /></div>
+            <div><Label>URL personalizada</Label><Input placeholder="ex: introducao-gancho-cientifico" /></div>
+            <div className="sm:col-span-2">
+              <Label>Categoria</Label>
+              <CategoriaSelector cats={catsPrompt} setCats={setCatsPrompt} placeholder="Nova categoria de prompt..." />
+            </div>
+            <div className="sm:col-span-2"><Label>Descrição breve</Label><Input placeholder="O que esse prompt produz e quando usar..." value={promptForm.descricao} onChange={(v) => setPromptForm((f) => ({ ...f, descricao: v }))} /></div>
+            <div className="sm:col-span-2">
+              <Label>Texto do Prompt</Label>
+              <p className="text-xs text-slate-400 mb-1.5">Use <code className="bg-slate-100 px-1 rounded text-slate-600">[VARIÁVEL]</code> para campos que o aluno deve preencher.</p>
+              <textarea rows={7} value={promptForm.conteudo} onChange={(e) => setPromptForm((f) => ({ ...f, conteudo: e.target.value }))} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white font-mono leading-relaxed" placeholder="Ex: Atue como um especialista em [ÁREA]. Meu tema de pesquisa é [TEMA]..." />
+            </div>
+            <VisibilidadeField vis={visibilidadePrompt} setVis={setVisibilidadePrompt} alunos={alunosPrompt} setAlunos={setAlunosPrompt} />
+            <div>
+              <Label>Material de referência (opcional)</Label>
+              <button type="button" onClick={() => materialPromptRef.current?.click()} className="flex items-center gap-2 px-3 py-2 border border-dashed border-slate-300 rounded-lg text-xs text-slate-500 hover:border-slate-400 hover:bg-slate-50 transition-all w-full justify-center">
+                <Upload className="w-3.5 h-3.5" /> Anexar arquivo de apoio
+                <input ref={materialPromptRef} type="file" accept=".pdf,.doc,.docx" className="hidden" />
+              </button>
+            </div>
+          </div>
+
+          {feedbackMsg && editorTab === "prompt" && (
+            <p className={`text-xs font-semibold flex items-center gap-1 ${feedbackMsg.tipo === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+              {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
+            </p>
+          )}
+          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <button onClick={salvarPrompt} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar Prompt"}</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── LIVRO ── */}
+      {editorTab === "livro" && (
+        <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-6 space-y-5 fx-fade">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <BookMarked className="w-4 h-4 text-rose-600" strokeWidth={1.5} />
+            Adicionar / Editar Livro
+          </div>
+
+          <ImageUploadField label="Capa do Livro" url={capaLivro} setUrl={setCapaLivro} inputRef={capaLivroRef} height="h-44" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2"><Label>Título</Label><Input placeholder="Ex: Principles of Structural Equation Modeling" value={livroForm.titulo} onChange={(v) => setLivroForm((f) => ({ ...f, titulo: v }))} /></div>
+            <div><Label>Autor(es)</Label><Input placeholder="Ex: Rex Kline" /></div>
+            <div><Label>Editora</Label><Input placeholder="Ex: Guilford Press" /></div>
+            <div><Label>Ano de publicação</Label><Input placeholder="2024" type="number" /></div>
+            <div><Label>URL personalizada</Label><Input placeholder="ex: kline-sem-2024" /></div>
+            <div className="sm:col-span-2">
+              <Label>Categoria / Área</Label>
+              <CategoriaSelector cats={catsLivro} setCats={setCatsLivro} placeholder="Nova categoria de livro..." />
+            </div>
+            <div className="sm:col-span-2"><Label>Em quais trilhas/cursos é referência</Label><Input placeholder="Ex: SEM, Análise Fatorial, Psicometria Avançada" /></div>
+            <div className="sm:col-span-2"><Label>Contexto / Por que este livro</Label><textarea rows={3} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white" placeholder="Breve descrição do livro e por que é referência na plataforma..." /></div>
+            <div className="sm:col-span-2"><Label>Link de acesso / compra (opcional)</Label><Input placeholder="https://..." /></div>
+          </div>
+
+          {feedbackMsg && editorTab === "livro" && (
+            <p className={`text-xs font-semibold flex items-center gap-1 ${feedbackMsg.tipo === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+              {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
+            </p>
+          )}
+          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <button onClick={salvarLivro} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar Livro"}</button>
+          </div>
         </div>
       )}
     </div>
@@ -4380,109 +5380,206 @@ function AdminPage() {
 // ─── LOGIN PAGE ────────────────────────────────────────────────────────────
 
 function LoginPage({ onLogin }: { onLogin: () => void }) {
+  const { sendOtp, verifyOtp } = useAuthContext();
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [showSenha, setShowSenha] = useState(false);
+  const [codigo, setCodigo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState("");
+  const [linkExpirado, setLinkExpirado] = useState(false);
+  const [reenviadoOk, setReenviadoOk] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const hash = window.location.hash;
+    const isExpired = hash.includes("error_code=otp_expired") || hash.includes("error_code=otp_disabled") || hash.includes("error=access_denied");
+    if (isExpired) {
+      const emailSalvo = localStorage.getItem("otp_email") ?? "";
+      if (emailSalvo) {
+        setEmail(emailSalvo);
+        setLinkExpirado(true);
+      } else {
+        setErro("Seu link expirou. Digite seu e-mail para receber um novo código.");
+      }
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
-    if (!email || !senha) { setErro("Preencha e-mail e senha."); return; }
+    if (!email.trim() || !email.includes("@")) { setErro("Informe um e-mail válido."); return; }
     setLoading(true);
-    setTimeout(() => { setLoading(false); onLogin(); }, 1200);
+    try {
+      localStorage.setItem("otp_email", email);
+      await sendOtp(email);
+      setEnviado(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error
+        ? (err.message || JSON.stringify(err))
+        : JSON.stringify(err);
+      setErro(msg || "Erro desconhecido ao enviar o código.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerificar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErro("");
+    if (codigo.length < 6) { setErro("Digite o código de 6 dígitos recebido por e-mail."); return; }
+    setLoading(true);
+    try {
+      await verifyOtp(email, codigo);
+      localStorage.removeItem("otp_email");
+      onLogin();
+    } catch {
+      setErro("Código inválido ou expirado. Verifique e tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReenviar = async () => {
+    setErro("");
+    setCodigo("");
+    setReenviadoOk(false);
+    setLoading(true);
+    try {
+      await sendOtp(email);
+      setLinkExpirado(false);
+      setEnviado(true);
+      setReenviadoOk(true);
+    } catch {
+      setErro("Não foi possível reenviar. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-slate-950">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#0a0a3a]">
       {/* background blobs */}
-      <div className="pointer-events-none absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full bg-blue-700/20 blur-[100px]" />
-      <div className="pointer-events-none absolute -bottom-40 -right-20 w-[420px] h-[420px] rounded-full bg-indigo-600/20 blur-[100px]" />
+      <div className="pointer-events-none absolute -top-32 -left-32 w-[560px] h-[560px] rounded-full blur-[120px]" style={{ background: "rgba(101,120,196,0.28)" }} />
+      <div className="pointer-events-none absolute -bottom-40 -right-20 w-[480px] h-[480px] rounded-full blur-[120px]" style={{ background: "rgba(201,169,97,0.15)" }} />
       <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-slate-800/40 blur-[80px]" />
+      {/* decorative brand mark watermark */}
+      <div className="pointer-events-none absolute -right-24 top-1/4 opacity-[0.04]">
+        <BrandMarkLight className="w-[480px] h-[480px]" />
+      </div>
 
       <div className="relative w-full max-w-md px-6">
         {/* Logo / brand */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-[0_8px_30px_rgba(59,130,246,0.4)] mb-4">
-            <Star className="w-7 h-7 text-white" />
+        <div className="flex flex-col items-center mb-10 fx-rise">
+          <div className="mb-5 p-4 rounded-2xl" style={{ background: "rgba(249,243,221,0.06)", border: "1px solid rgba(249,243,221,0.12)" }}>
+            <BrandMarkLight className="w-16 h-16" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Pesquisa <span className="text-blue-400">passo a passo</span>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <span className="text-[#f9f3dd]">Pesquisa</span>{" "}
+            <span className="text-[#6578c4]">passo a passo</span>
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Acesse sua conta para continuar</p>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="h-px w-10" style={{ background: "rgba(201,169,97,0.5)" }} />
+            <p className="text-[#c9a961]/80 text-xs font-medium tracking-widest uppercase">Plataforma de pesquisa</p>
+            <div className="h-px w-10" style={{ background: "rgba(201,169,97,0.5)" }} />
+          </div>
         </div>
 
         {/* Card */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">E-mail</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  className="w-full bg-white/8 border border-white/12 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                />
+        <div className="backdrop-blur-xl rounded-2xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] fx-rise" style={{ background: "rgba(249,243,221,0.04)", border: "1px solid rgba(249,243,221,0.10)", animationDelay: "80ms" }}>
+          {linkExpirado ? (
+            <div className="space-y-5 text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{ background: "rgba(201,169,97,0.12)", border: "1px solid rgba(201,169,97,0.3)" }}>
+                <AlertCircle className="w-7 h-7 text-[#c9a961]" />
               </div>
-            </div>
-
-            {/* Senha */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Senha</label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input
-                  type={showSenha ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-white/8 border border-white/12 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSenha((v) => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-                >
-                  {showSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+              <div>
+                <h2 className="text-lg font-bold text-white mb-1">Link expirado</h2>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  O link enviado para <span className="text-[#c0c8ec] font-medium">{email}</span> não é mais válido.
+                </p>
               </div>
-            </div>
-
-            {/* Erro */}
-            {erro && (
-              <p className="text-rose-400 text-xs flex items-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5" /> {erro}
-              </p>
-            )}
-
-            {/* Esqueci senha */}
-            <div className="flex justify-end">
-              <button type="button" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-                Esqueci minha senha
+              {erro && <p className="text-rose-400 text-xs flex items-center justify-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> {erro}</p>}
+              <button
+                onClick={handleReenviar}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#6578c4] to-[#0a0a3a] hover:from-[#7689d4] hover:to-[#141457] disabled:opacity-60 text-white font-semibold py-3 rounded-xl shadow-[0_4px_20px_rgba(101,120,196,0.40)] transition-all duration-200 fx-tap"
+              >
+                {loading ? <><RefreshCw className="w-4 h-4 animate-spin" /> Enviando...</> : <><Send className="w-4 h-4 -rotate-45" /> Enviar novo código</>}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLinkExpirado(false); setEmail(""); setErro(""); }}
+                className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                Usar outro e-mail
               </button>
             </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-60 text-white font-semibold py-3 rounded-xl shadow-[0_4px_20px_rgba(59,130,246,0.35)] hover:shadow-[0_6px_28px_rgba(59,130,246,0.5)] transition-all duration-200 fx-tap"
-            >
-              {loading ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  Entrando...
-                </>
-              ) : "Entrar"}
-            </button>
-          </form>
+          ) : enviado ? (
+            <form onSubmit={handleVerificar} className="space-y-5">
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(101,120,196,0.15)", border: "1px solid rgba(101,120,196,0.3)" }}>
+                  <Mail className="w-7 h-7 text-[#6578c4]" />
+                </div>
+                <h2 className="text-lg font-bold text-white mb-1">Verifique seu e-mail</h2>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Enviamos um código de 6 dígitos para <span className="text-[#c0c8ec] font-medium">{email}</span>
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Código de acesso</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
+                  placeholder="000000"
+                  className="w-full bg-white/8 border border-white/12 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#6578c4] focus:ring-1 focus:ring-[#6578c4]/50 transition-all text-center tracking-[0.4em] text-base font-semibold"
+                />
+              </div>
+              {erro && <p className="text-rose-400 text-xs flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> {erro}</p>}
+              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#6578c4] to-[#0a0a3a] hover:from-[#7689d4] hover:to-[#141457] disabled:opacity-60 text-white font-semibold py-3 rounded-xl shadow-[0_4px_20px_rgba(101,120,196,0.40)] transition-all duration-200 fx-tap">
+                {loading ? <><RefreshCw className="w-4 h-4 animate-spin" /> Verificando...</> : <><Check className="w-4 h-4" /> Entrar</>}
+              </button>
+              <button
+                type="button"
+                onClick={handleReenviar}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-sm font-medium transition-all disabled:opacity-50"
+                style={{ color: "#c0c8ec", background: "rgba(101,120,196,0.08)" }}
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                Reenviar código
+              </button>
+              <button type="button" onClick={() => { setEnviado(false); setCodigo(""); setErro(""); }} className="mt-1 text-xs text-slate-500 hover:text-slate-300 transition-colors block mx-auto text-center w-full">
+                Usar outro e-mail
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="text-center mb-2">
+                <h2 className="text-base font-semibold text-white">Entrar com e-mail</h2>
+                <p className="text-xs text-slate-400 mt-1">Enviaremos um link de acesso seguro para você</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">E-mail</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    className="w-full bg-white/8 border border-white/12 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#6578c4] focus:ring-1 focus:ring-[#6578c4]/50 transition-all"
+                  />
+                </div>
+              </div>
+              {erro && <p className="text-rose-400 text-xs flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> {erro}</p>}
+              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#6578c4] to-[#0a0a3a] hover:from-[#7689d4] hover:to-[#141457] disabled:opacity-60 text-white font-semibold py-3 rounded-xl shadow-[0_4px_20px_rgba(101,120,196,0.40)] transition-all duration-200 fx-tap">
+                {loading ? <><RefreshCw className="w-4 h-4 animate-spin" /> Enviando...</> : <><Send className="w-4 h-4 -rotate-45" /> Enviar código de acesso</>}
+              </button>
+            </form>
+          )}
         </div>
 
         <p className="text-center text-xs text-slate-600 mt-6">
@@ -4496,13 +5593,35 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
 // ─── PERFIL PAGE ────────────────────────────────────────────────────────────
 
 const perfilInicial = {
-  nome: "Sandro Alves de Medeiros",
-  email: "sandro.medeiros@email.com",
-  bio: "Pesquisador em Metodologia Quantitativa, entusiasta de análise de dados e educação em ciências sociais aplicadas.",
-  endereco: "São Paulo, SP — Brasil",
-  ocupacao: "Professor & Pesquisador",
-  avatar: "SA",
+  nome: "",
+  email: "",
+  bio: "",
+  endereco: "",
+  ocupacao: "",
+  avatar: "",
 };
+
+function PerfilField({ label, value, field, editando, rascunho, onChange, multiline = false }: {
+  label: string; value: string; field: string; editando: boolean;
+  rascunho: Record<string, string>; onChange: (f: string, v: string) => void; multiline?: boolean;
+}) {
+  return (
+    <div className="space-y-1">
+      <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</label>
+      {editando ? (
+        multiline ? (
+          <textarea rows={3} value={rascunho[field] ?? ""} onChange={(e) => onChange(field, e.target.value)}
+            className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6578c4]/40 resize-none bg-white" />
+        ) : (
+          <input value={rascunho[field] ?? ""} onChange={(e) => onChange(field, e.target.value)}
+            className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6578c4]/40 bg-white" />
+        )
+      ) : (
+        <p className="text-sm text-slate-700 py-2.5 px-3.5 bg-slate-50 rounded-xl border border-slate-100">{value || "—"}</p>
+      )}
+    </div>
+  );
+}
 
 function PerfilPage({ fotoUrl, bannerUrl, onUpdateFoto, onUpdateBanner }: {
   fotoUrl: string;
@@ -4510,47 +5629,82 @@ function PerfilPage({ fotoUrl, bannerUrl, onUpdateFoto, onUpdateBanner }: {
   onUpdateFoto: (url: string) => void;
   onUpdateBanner: (url: string) => void;
 }) {
+  const { usuario, session, refreshUsuario } = useAuthContext();
+  const dadosInicial = {
+    nome: usuario?.nome ?? perfilInicial.nome,
+    email: usuario?.email ?? perfilInicial.email,
+    bio: usuario?.biografia ?? perfilInicial.bio,
+    endereco: perfilInicial.endereco,
+    ocupacao: perfilInicial.ocupacao,
+    avatar: perfilInicial.avatar,
+  };
   const [editando, setEditando] = useState(false);
-  const [dados, setDados] = useState(perfilInicial);
-  const [rascunho, setRascunho] = useState(perfilInicial);
+  const [dados, setDados] = useState(dadosInicial);
+  const [rascunho, setRascunho] = useState(dadosInicial);
+  const [salvando, setSalvando] = useState(false);
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (usuario) {
+      const novo = {
+        ...dadosInicial,
+        nome: usuario.nome ?? "",
+        email: usuario.email,
+        bio: usuario.biografia ?? "",
+        ocupacao: (usuario as { ocupacao?: string | null }).ocupacao ?? "",
+      };
+      setDados(novo);
+      setRascunho(novo);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuario]);
   const fotoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  const salvar = () => { setDados(rascunho); setEditando(false); };
-  const cancelar = () => { setRascunho(dados); setEditando(false); };
+  const salvar = async () => {
+    if (!session) return;
+    setSalvando(true);
+
+    let fotoUrl: string | undefined;
+    if (fotoFile) {
+      fotoUrl = await storageApi.uploadAvatar(session.user.id, fotoFile) ?? undefined;
+      if (fotoUrl) onUpdateFoto(fotoUrl);
+    }
+
+    await perfilApi.updatePerfil(session.user.id, {
+      nome: rascunho.nome,
+      biografia: rascunho.bio,
+      ocupacao: rascunho.ocupacao || null,
+      ...(fotoUrl ? { foto_url: fotoUrl } : {}),
+    });
+
+    if (rascunho.endereco) {
+      const partes = rascunho.endereco.split(",").map((s: string) => s.trim());
+      await perfilApi.upsertEndereco(session.user.id, {
+        rua: partes[0] || null,
+        cidade: partes[1] || null,
+        estado: partes[2] || null,
+        cep: null,
+      });
+    }
+
+    await refreshUsuario();
+    setSalvando(false);
+    setDados(rascunho);
+    setFotoFile(null);
+    setEditando(false);
+  };
+  const cancelar = () => { setRascunho(dados); setFotoFile(null); setEditando(false); };
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) onUpdateFoto(URL.createObjectURL(f));
+    if (f) { setFotoFile(f); onUpdateFoto(URL.createObjectURL(f)); }
   };
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f) onUpdateBanner(URL.createObjectURL(f));
   };
-
-  const Field = ({ label, value, field, multiline = false }: { label: string; value: string; field: keyof typeof perfilInicial; multiline?: boolean }) => (
-    <div className="space-y-1">
-      <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</label>
-      {editando ? (
-        multiline ? (
-          <textarea
-            rows={3}
-            value={rascunho[field]}
-            onChange={(e) => setRascunho((p) => ({ ...p, [field]: e.target.value }))}
-            className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40 resize-none bg-white"
-          />
-        ) : (
-          <input
-            value={rascunho[field]}
-            onChange={(e) => setRascunho((p) => ({ ...p, [field]: e.target.value }))}
-            className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40 bg-white"
-          />
-        )
-      ) : (
-        <p className="text-sm text-slate-700 py-2.5 px-3.5 bg-slate-50 rounded-xl border border-slate-100">{value}</p>
-      )}
-    </div>
-  );
+  const handleFieldChange = (f: string, v: string) => setRascunho((p) => ({ ...p, [f]: v }));
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -4558,7 +5712,11 @@ function PerfilPage({ fotoUrl, bannerUrl, onUpdateFoto, onUpdateBanner }: {
       <div className="relative rounded-2xl overflow-visible">
         {/* Banner clicável */}
         <div className="relative h-40 rounded-2xl overflow-hidden group cursor-pointer" onClick={() => bannerInputRef.current?.click()}>
-          <img src={bannerUrl} alt="Capa do perfil" className="w-full h-full object-cover" />
+          {bannerUrl ? (
+            <img src={bannerUrl} alt="Capa do perfil" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-[#0a0a3a] via-[#1e2a6e] to-[#6578c4]" />
+          )}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center">
             <span className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-lg border border-white/30">
               <Upload className="w-3.5 h-3.5" /> Alterar capa
@@ -4593,8 +5751,8 @@ function PerfilPage({ fotoUrl, bannerUrl, onUpdateFoto, onUpdateBanner }: {
           ) : (
             <div className="flex gap-2">
               <button onClick={cancelar} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/20 text-white hover:bg-white/30 border border-white/30 fx-tap">Cancelar</button>
-              <button onClick={salvar} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white text-slate-800 hover:bg-slate-100 fx-tap">
-                <Save className="w-3.5 h-3.5 inline mr-1" />Salvar
+              <button onClick={salvar} disabled={salvando} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white text-slate-800 hover:bg-slate-100 fx-tap disabled:opacity-60">
+                <Save className="w-3.5 h-3.5 inline mr-1" />{salvando ? "Salvando..." : "Salvar"}
               </button>
             </div>
           )}
@@ -4618,37 +5776,35 @@ function PerfilPage({ fotoUrl, bannerUrl, onUpdateFoto, onUpdateBanner }: {
       </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Cursos concluídos", value: "7", color: "text-emerald-600" },
-          { label: "Certificados", value: "4", color: "text-blue-600" },
-          { label: "XP acumulado", value: "2.840", color: "text-indigo-600" },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">{label}</p>
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-3 fx-stagger-grid">
+        <div className="border rounded-2xl p-4 text-center" style={{ background: "#f9f3dd", borderColor: "rgba(101,120,196,0.15)" }}>
+          <p className="text-2xl font-bold text-[#6578c4]">7</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">Cursos concluídos</p>
+        </div>
+        <div className="border rounded-2xl p-4 text-center" style={{ background: "rgba(201,169,97,0.10)", borderColor: "rgba(201,169,97,0.25)" }}>
+          <p className="text-2xl font-bold" style={{ color: "#8a6210" }}>4</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">Certificados</p>
+        </div>
       </div>
 
       {/* Editable fields */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 space-y-4 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-1">Informações pessoais</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Nome completo" value={dados.nome} field="nome" />
-          <Field label="Ocupação" value={dados.ocupacao} field="ocupacao" />
-          <Field label="E-mail" value={dados.email} field="email" />
-          <Field label="Endereço" value={dados.endereco} field="endereco" />
+          <PerfilField label="Nome completo" value={dados.nome} field="nome" editando={editando} rascunho={rascunho} onChange={handleFieldChange} />
+          <PerfilField label="Ocupação" value={dados.ocupacao} field="ocupacao" editando={editando} rascunho={rascunho} onChange={handleFieldChange} />
+          <PerfilField label="E-mail" value={dados.email} field="email" editando={editando} rascunho={rascunho} onChange={handleFieldChange} />
+          <PerfilField label="Endereço" value={dados.endereco} field="endereco" editando={editando} rascunho={rascunho} onChange={handleFieldChange} />
         </div>
-        <Field label="Bio" value={dados.bio} field="bio" multiline />
+        <PerfilField label="Bio" value={dados.bio} field="bio" editando={editando} rascunho={rascunho} onChange={handleFieldChange} multiline />
       </div>
 
       {/* Badges */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-3">Conquistas</h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 fx-stagger-fast">
           {[
-            { label: "Primeiro Curso", color: "bg-blue-100 text-blue-700" },
+            { label: "Primeiro Curso", color: "bg-[#6578c4]/15 text-[#5568b3]" },
             { label: "5 Certificados", color: "bg-emerald-100 text-emerald-700" },
             { label: "Metodólogo", color: "bg-indigo-100 text-indigo-700" },
             { label: "Pesquisador Ativo", color: "bg-amber-100 text-amber-700" },
@@ -4666,65 +5822,83 @@ function PerfilPage({ fotoUrl, bannerUrl, onUpdateFoto, onUpdateBanner }: {
 // ─── ASSINATURA PAGE ────────────────────────────────────────────────────────
 
 function AssinaturaPage() {
-  const planoAtual = "consultoria";
+  const { plano, assinatura, refreshUsuario } = useAuthContext();
+  const planoAtual: "essencial" | "consultoria" = plano ?? "essencial";
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [consultoriaPlanoId, setConsultoriaPlanoId] = useState<string | null>(null);
+  const [abrindoPortal, setAbrindoPortal] = useState(false);
+  useModalBlur(showUpgrade);
 
-  const planos = [
-    {
-      id: "essencial",
-      nome: "Essencial",
-      preco: "R$ 97",
-      periodo: "/mês",
-      desc: "Acesso completo à plataforma de cursos",
-      cor: "from-slate-700 to-slate-900",
-      badge: null,
-      recursos: [
-        { texto: "Plataforma de Aulas completa", ok: true },
-        { texto: "Livros Metodológicos", ok: true },
-        { texto: "GPTs especializados", ok: true },
-        { texto: "Biblioteca de Prompts", ok: true },
-        { texto: "Certificados de conclusão", ok: true },
-        { texto: "Comunidade", ok: true },
-        { texto: "Consultoria individual", ok: false },
-        { texto: "Aulas particulares", ok: false },
-        { texto: "GPTs personalizados para você", ok: false },
-        { texto: "Prompts exclusivos por aluno", ok: false },
-      ],
-    },
-    {
-      id: "consultoria",
-      nome: "Consultoria",
-      preco: "R$ 197",
-      periodo: "/mês",
-      desc: "Tudo do Essencial + consultoria personalizada",
-      cor: "from-blue-600 to-indigo-700",
-      badge: "Recomendado",
-      recursos: [
-        { texto: "Plataforma de Aulas completa", ok: true },
-        { texto: "Livros Metodológicos", ok: true },
-        { texto: "GPTs especializados", ok: true },
-        { texto: "Biblioteca de Prompts", ok: true },
-        { texto: "Certificados de conclusão", ok: true },
-        { texto: "Comunidade", ok: true },
-        { texto: "Consultoria individual", ok: true },
-        { texto: "Aulas particulares", ok: true },
-        { texto: "GPTs personalizados para você", ok: true },
-        { texto: "Prompts exclusivos por aluno", ok: true },
-      ],
-    },
+  const abrirPortalStripe = async () => {
+    setAbrindoPortal(true);
+    try {
+      const { data: { session } } = await (await import("../lib/supabase")).supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-portal-session`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ return_url: window.location.href }),
+        }
+      );
+      const json = await res.json();
+      if (json.url) window.open(json.url, "_blank");
+    } catch {
+      alert("Não foi possível abrir o portal de pagamentos. Tente novamente.");
+    } finally {
+      setAbrindoPortal(false);
+    }
+  };
+
+  useEffect(() => {
+    assinaturasApi.getPlanos().then(({ data }) => {
+      const consultoria = data?.find((p) => p.nome === "consultoria");
+      if (consultoria) setConsultoriaPlanoId(consultoria.id);
+    });
+  }, []);
+
+  const beneficiosExtras = [
+    { texto: "Consultoria individual com a Dra. Sandri", icon: GraduationCap },
+    { texto: "Aulas particulares agendadas", icon: CalendarDays },
+    { texto: "GPTs personalizados para o seu projeto", icon: Sparkles },
+    { texto: "Prompts exclusivos criados para você", icon: FileText },
   ];
+
+  const renovacao = assinatura?.data_fim
+    ? new Date(assinatura.data_fim).toLocaleDateString("pt-BR")
+    : "—";
+  const preco = assinatura?.planos?.preco_mensal
+    ? `R$ ${Number(assinatura.planos.preco_mensal).toFixed(2).replace(".", ",")}`
+    : planoAtual === "consultoria" ? "R$ 99,90" : "R$ 49,90";
+  const planoBanner = planoAtual === "consultoria"
+    ? { nome: "Consultoria Individual", preco, renovacao, cor: "from-[#0a0a3a] to-[#6578c4]" }
+    : { nome: "Plano Essencial", preco, renovacao, cor: "from-[#0a0a3a] to-slate-800" };
+
+  const historicoEssencial = [
+    { data: "15/05/2025", valor: "R$ 97,00", status: "Pago" },
+    { data: "15/04/2025", valor: "R$ 97,00", status: "Pago" },
+    { data: "15/03/2025", valor: "R$ 97,00", status: "Pago" },
+  ];
+  const historicoConsultoria = [
+    { data: "15/05/2025", valor: "R$ 197,00", status: "Pago" },
+    { data: "15/04/2025", valor: "R$ 197,00", status: "Pago" },
+    { data: "15/03/2025", valor: "R$ 197,00", status: "Pago" },
+  ];
+  const historico = planoAtual === "consultoria" ? historicoConsultoria : historicoEssencial;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Plano atual banner */}
-      <div className="bg-gradient-to-r from-[#1e3a5f] to-blue-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className={`bg-gradient-to-r ${planoBanner.cor} rounded-2xl p-6 text-white shadow-lg relative overflow-hidden`}>
         <div className="pointer-events-none absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5 blur-2xl" />
         <div className="pointer-events-none absolute right-20 bottom-0 w-32 h-32 rounded-full bg-blue-400/10 blur-2xl" />
         <div className="relative">
-          <p className="text-xs font-semibold uppercase tracking-wider text-blue-200 mb-1">Plano atual</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-white/60 mb-1">Plano atual</p>
           <h2 className="text-2xl font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Consultoria Individual
+            {planoBanner.nome}
           </h2>
-          <p className="text-blue-200 text-sm mt-1">Renovação em 15/06/2025 · <span className="text-white font-semibold">R$ 197/mês</span></p>
+          <p className="text-white/70 text-sm mt-1">Renovação em {planoBanner.renovacao} · <span className="text-white font-semibold">{planoBanner.preco}/mês</span></p>
           <div className="flex flex-wrap gap-2 mt-4">
             {["Ativo", "Pagamento em dia"].map((tag) => (
               <span key={tag} className="text-xs font-semibold px-2.5 py-1 bg-white/15 rounded-full border border-white/20">{tag}</span>
@@ -4744,57 +5918,49 @@ function AssinaturaPage() {
             <p className="text-xs text-slate-400">Vence em 08/2027</p>
           </div>
         </div>
-        <button className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">Alterar</button>
+        <button onClick={abrirPortalStripe} disabled={abrindoPortal} className="text-xs font-semibold text-[#6578c4] hover:text-[#5568b3] transition-colors disabled:opacity-50">
+          {abrindoPortal ? "Abrindo..." : "Alterar"}
+        </button>
       </div>
 
-      {/* Comparação de planos */}
-      <div>
-        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">Compare os planos</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {planos.map((p) => {
-            const ativo = planoAtual === p.id;
-            return (
-              <div key={p.id} className={`relative rounded-2xl overflow-hidden border-2 ${ativo ? "border-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.12)]" : "border-slate-200"} bg-white`}>
-                {p.badge && (
-                  <div className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wide bg-blue-600 text-white px-2 py-0.5 rounded-full">{p.badge}</div>
-                )}
-                <div className={`bg-gradient-to-br ${p.cor} p-5 text-white`}>
-                  <p className="text-sm font-semibold opacity-80">{p.nome}</p>
-                  <p className="text-3xl font-bold mt-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{p.preco}<span className="text-sm font-normal opacity-70">{p.periodo}</span></p>
-                  <p className="text-xs opacity-70 mt-1">{p.desc}</p>
-                </div>
-                <div className="p-5 space-y-2.5">
-                  {p.recursos.map(({ texto, ok }) => (
-                    <div key={texto} className="flex items-center gap-2.5 text-xs">
-                      <span className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center ${ok ? "bg-emerald-100" : "bg-slate-100"}`}>
-                        {ok ? <Check className="w-2.5 h-2.5 text-emerald-600" strokeWidth={3} /> : <X className="w-2.5 h-2.5 text-slate-400" strokeWidth={3} />}
-                      </span>
-                      <span className={ok ? "text-slate-700" : "text-slate-400"}>{texto}</span>
-                    </div>
-                  ))}
-                  <div className="pt-3">
-                    {ativo ? (
-                      <div className="w-full text-center text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 rounded-xl py-2.5">Plano atual</div>
-                    ) : (
-                      <button className="w-full text-xs font-semibold bg-slate-900 text-white rounded-xl py-2.5 hover:bg-slate-800 transition-colors fx-tap">Fazer upgrade</button>
-                    )}
-                  </div>
-                </div>
+      {/* Se Essencial: mostrar card de upgrade para Consultoria */}
+      {planoAtual === "essencial" && (
+        <div className="bg-gradient-to-br from-[#0a0a3a] via-[#1a1f5e] to-[#6578c4] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+          <div className="pointer-events-none absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5 blur-2xl" />
+          <div className="pointer-events-none absolute right-4 bottom-0 opacity-10">
+            <MentoriaSymbol className="w-24 h-24" />
+          </div>
+          <div className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full" style={{ background: "rgba(201,169,97,0.25)", color: "#c9a961", border: "1px solid rgba(201,169,97,0.35)" }}>Upgrade disponível</div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#c9a961] mb-1">Mentoria Individual</p>
+          <p className="text-3xl font-bold mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>R$ 197<span className="text-sm font-normal text-[#c5cdf0]">/mês</span></p>
+          <p className="text-sm text-[#c5cdf0] mb-5">Tudo que você já tem, mais acesso direto e personalizado com a Dra. Sandri.</p>
+          <div className="space-y-2.5 mb-6">
+            {beneficiosExtras.map(({ texto, icon: Icon }) => (
+              <div key={texto} className="flex items-center gap-2.5 text-sm">
+                <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,169,97,0.2)", border: "1px solid rgba(201,169,97,0.3)" }}>
+                  <Icon className="w-3 h-3 text-[#c9a961]" />
+                </span>
+                <span className="text-white/90">{texto}</span>
               </div>
-            );
-          })}
+            ))}
+          </div>
+          <button
+            onClick={() => setShowUpgrade(true)}
+            className="w-full font-semibold text-sm py-3 rounded-xl transition-all fx-tap"
+            style={{ background: "rgba(201,169,97,0.15)", border: "1px solid rgba(201,169,97,0.35)", color: "#c9a961" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(201,169,97,0.25)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(201,169,97,0.15)")}
+          >
+            Fazer upgrade para Mentoria Individual
+          </button>
         </div>
-      </div>
+      )}
 
       {/* Histórico */}
       <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-3">Histórico de pagamentos</h3>
-        <div className="space-y-2">
-          {[
-            { data: "15/05/2025", valor: "R$ 197,00", status: "Pago" },
-            { data: "15/04/2025", valor: "R$ 197,00", status: "Pago" },
-            { data: "15/03/2025", valor: "R$ 197,00", status: "Pago" },
-          ].map(({ data, valor, status }) => (
+        <div className="space-y-2 fx-stagger-fast">
+          {historico.map(({ data, valor, status }) => (
             <div key={data} className="flex items-center justify-between text-xs py-2 border-b border-slate-50 last:border-0">
               <span className="text-slate-500">{data}</span>
               <span className="font-semibold text-slate-700">{valor}</span>
@@ -4803,6 +5969,22 @@ function AssinaturaPage() {
           ))}
         </div>
       </div>
+
+      {/* Modal de upgrade — Stripe Embedded Checkout */}
+      {showUpgrade && consultoriaPlanoId && (
+        <StripeCheckout
+          planoId={consultoriaPlanoId}
+          onClose={() => setShowUpgrade(false)}
+          onSucesso={() => { refreshUsuario(); setShowUpgrade(false); }}
+        />
+      )}
+      {showUpgrade && !consultoriaPlanoId && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 text-center shadow-2xl">
+            <p className="text-slate-600 text-sm">Carregando plano...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -4816,6 +5998,7 @@ const consultoriaGPTs = [
     cor: "from-blue-500 to-indigo-600",
     icone: Bot,
     tags: ["Quantitativa", "SEM", "R"],
+    url: "https://chatgpt.com/g/g-metodologia",
   },
   {
     nome: "Revisor de Escrita Científica",
@@ -4823,6 +6006,7 @@ const consultoriaGPTs = [
     cor: "from-violet-500 to-purple-700",
     icone: FileText,
     tags: ["Escrita", "APA", "ABNT"],
+    url: "https://chatgpt.com/g/g-revisor-escrita",
   },
   {
     nome: "Gerador de Sintaxe R",
@@ -4830,6 +6014,7 @@ const consultoriaGPTs = [
     cor: "from-emerald-500 to-teal-600",
     icone: Code,
     tags: ["R", "Script", "Análise"],
+    url: "https://chatgpt.com/g/g-sintaxe-r",
   },
 ];
 
@@ -4891,8 +6076,20 @@ const consultoriaPrompts = [
 type ConsultoriaTab = "gpts" | "aulas" | "prompts";
 
 function ConsultoriaPage() {
+  const { usuario } = useAuthContext();
   const [tab, setTab] = useState<ConsultoriaTab>("gpts");
   const [promptAberto, setPromptAberto] = useState<(typeof consultoriaPrompts)[0] | null>(null);
+  const [promptCopiado, setPromptCopiado] = useState(false);
+  const [aulaAberta, setAulaAberta] = useState<(typeof consultoriaAulas)[0] | null>(null);
+  useModalBlur(!!aulaAberta || !!promptAberto);
+
+  const handleCopiarPrompt = () => {
+    if (promptAberto) {
+      navigator.clipboard.writeText(`Atue como especialista em ${promptAberto.categoria.toLowerCase()}. Analise o seguinte contexto e forneça orientações metodológicas precisas, baseadas em evidências científicas recentes. Considere as especificidades do aluno e adapte sua resposta ao nível de profundidade necessário...`).catch(() => {});
+      setPromptCopiado(true);
+      setTimeout(() => setPromptCopiado(false), 2000);
+    }
+  };
 
   const tabs: { id: ConsultoriaTab; label: string; icon: ElementType }[] = [
     { id: "gpts", label: "GPTs Pessoais", icon: Bot },
@@ -4903,19 +6100,30 @@ function ConsultoriaPage() {
   return (
     <div className="space-y-6">
       {/* Hero personalizado */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1e3a5f] via-blue-700 to-indigo-700 p-6 text-white shadow-lg">
-        <div className="pointer-events-none absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&auto=format&fit=crop&q=40')] bg-cover bg-center opacity-10" />
-        <div className="pointer-events-none absolute -right-8 -top-8 w-48 h-48 rounded-full bg-white/5 blur-3xl" />
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#0a0a3a] via-[#1e2a6e] to-[#6578c4] p-6 text-white shadow-lg">
+        <div className="pointer-events-none absolute -right-12 -top-12 w-56 h-56 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-8 -bottom-8 w-40 h-40 rounded-full bg-[#6578c4]/20 blur-2xl" />
+        <div className="pointer-events-none absolute right-1/3 top-0 w-24 h-24 rounded-full bg-[#c9a961]/10 blur-2xl" />
+        {/* brand mark watermark */}
+        <div className="pointer-events-none absolute right-6 bottom-0 opacity-10">
+          <MentoriaSymbol className="w-28 h-28" />
+        </div>
         <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-xl font-bold shadow-inner flex-shrink-0">
-            SA
+          <div className="flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-xl font-bold shadow-inner">
+              {getInitials(usuario?.nome ?? "")}
+            </div>
           </div>
           <div className="flex-1">
-            <p className="text-blue-200 text-xs font-semibold uppercase tracking-wider mb-0.5">Consultoria Individual</p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: "rgba(201,169,97,0.25)", color: "#c9a961", border: "1px solid rgba(201,169,97,0.3)" }}>
+                Mentoria Individual
+              </span>
+            </div>
             <h2 className="text-xl font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Olá, Sandro Alves de Medeiros
+              Olá, {usuario?.nome ?? ""}
             </h2>
-            <p className="text-blue-200 text-sm mt-0.5">Seu espaço personalizado com conteúdo exclusivo da Dra. Sandri</p>
+            <p className="text-[#c5cdf0] text-sm mt-0.5">Seu espaço personalizado com conteúdo exclusivo da Dra. Sandri</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {[
@@ -4923,7 +6131,7 @@ function ConsultoriaPage() {
               { label: "4 Aulas", icon: CalendarDays },
               { label: "3 Prompts", icon: Sparkles },
             ].map(({ label, icon: Icon }) => (
-              <div key={label} className="flex items-center gap-1.5 bg-white/15 border border-white/20 rounded-xl px-3 py-1.5 text-xs font-semibold">
+              <div key={label} className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold" style={{ background: "rgba(249,243,221,0.12)", border: "1px solid rgba(249,243,221,0.18)" }}>
                 <Icon className="w-3.5 h-3.5" /> {label}
               </div>
             ))}
@@ -4946,11 +6154,11 @@ function ConsultoriaPage() {
 
       {/* GPTs */}
       {tab === "gpts" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 fx-stagger-grid">
           {consultoriaGPTs.map((gpt) => {
             const Icon = gpt.icone;
             return (
-              <div key={gpt.nome} className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+              <div key={gpt.nome} className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group fx-hover-glow">
                 <div className={`h-2 bg-gradient-to-r ${gpt.cor}`} />
                 <div className="p-5">
                   <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gpt.cor} flex items-center justify-center mb-3 shadow-sm`}>
@@ -4963,7 +6171,11 @@ function ConsultoriaPage() {
                       <span key={t} className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{t}</span>
                     ))}
                   </div>
-                  <button className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold bg-slate-900 text-white rounded-xl py-2.5 hover:bg-slate-800 transition-colors fx-tap">
+                  <button
+                    onClick={() => window.open(gpt.url, "_blank", "noopener,noreferrer")}
+                    className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-white rounded-xl py-2.5 hover:opacity-90 transition-opacity fx-tap"
+                    style={{ background: "#6578c4" }}
+                  >
                     <ExternalLink className="w-3.5 h-3.5" /> Abrir GPT
                   </button>
                 </div>
@@ -4975,12 +6187,16 @@ function ConsultoriaPage() {
 
       {/* Aulas */}
       {tab === "aulas" && (
-        <div className="space-y-3">
+        <div className="space-y-3 fx-stagger-fast">
           {consultoriaAulas.map((a) => (
-            <div key={a.titulo} className="bg-white border border-slate-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+            <button
+              key={a.titulo}
+              onClick={() => setAulaAberta(a)}
+              className="w-full bg-white border border-slate-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-all text-left fx-hover-lift cursor-pointer group"
+            >
               <div className={`w-2 self-stretch rounded-full flex-shrink-0 ${a.cor}`} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">{a.titulo}</p>
+                <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#6578c4] transition-colors">{a.titulo}</p>
                 <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
                   <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {a.duracao}</span>
                   <span className="flex items-center gap-1"><CalendarDays className="w-3 h-3" /> {a.data}</span>
@@ -4989,20 +6205,71 @@ function ConsultoriaPage() {
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${a.status === "Assistida" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
                 {a.status}
               </span>
-            </div>
+              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#6578c4] transition-colors flex-shrink-0" />
+            </button>
           ))}
-          <button className="w-full flex items-center justify-center gap-2 text-sm font-semibold border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl py-4 hover:border-blue-300 hover:text-blue-500 transition-all">
+          <button className="w-full flex items-center justify-center gap-2 text-sm font-semibold border-2 border-dashed border-slate-200 text-slate-400 rounded-2xl py-4 hover:border-[#6578c4]/40 hover:text-[#6578c4] transition-all">
             <PlusCircle className="w-4 h-4" /> Solicitar nova aula
           </button>
+        </div>
+      )}
+
+      {/* Modal de aula individual */}
+      {aulaAberta && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/45 backdrop-blur-sm" onClick={() => setAulaAberta(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Aula Individual · Dra. Sandri</p>
+                <h3 className="text-base font-bold text-slate-800 mt-0.5">{aulaAberta.titulo}</h3>
+              </div>
+              <button onClick={() => setAulaAberta(null)} className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {aulaAberta.status === "Assistida" ? (
+              <div>
+                <div className="relative aspect-video bg-slate-900 overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <button className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-2xl hover:scale-105 transition-transform">
+                      <Send className="w-6 h-6 -rotate-45 translate-x-px text-slate-900" strokeWidth={2.5} />
+                    </button>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 px-4 pb-3 pt-8 bg-gradient-to-t from-slate-900/90 to-transparent">
+                    <div className="h-1 bg-white/20 rounded-full overflow-hidden mb-2">
+                      <div className="h-full w-full bg-white/60 rounded-full" />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-white/80">
+                      <span>{aulaAberta.duracao}</span>
+                      <span>{aulaAberta.data}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 text-sm text-slate-600">
+                  Sessão concluída com a Dra. Sandri. Você pode revisitar o conteúdo aqui.
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 text-center">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(201,169,97,0.12)" }}>
+                  <CalendarDays className="w-7 h-7" style={{ color: "#c9a961" }} />
+                </div>
+                <p className="text-sm font-semibold text-slate-800 mb-1">Aula agendada</p>
+                <p className="text-sm text-slate-500 mb-1">Data: <strong>{aulaAberta.data}</strong></p>
+                <p className="text-sm text-slate-500 mb-5">Duração prevista: <strong>{aulaAberta.duracao}</strong></p>
+                <p className="text-xs text-slate-400">Você receberá um link de acesso por e-mail antes da sessão.</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Prompts */}
       {tab === "prompts" && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 fx-stagger-grid">
             {consultoriaPrompts.map((p) => (
-              <div key={p.titulo} className={`bg-gradient-to-br ${p.cor} border ${p.bordaCor} rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer group`} onClick={() => setPromptAberto(p)}>
+              <div key={p.titulo} className={`bg-gradient-to-br ${p.cor} border ${p.bordaCor} rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer group fx-hover-lift`} onClick={() => setPromptAberto(p)}>
                 <div className="flex items-start justify-between mb-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white/70 px-2 py-0.5 rounded-full">{p.categoria}</span>
                   <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition-colors" />
@@ -5015,7 +6282,7 @@ function ConsultoriaPage() {
 
           {/* Prompt modal */}
           {promptAberto && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm" onClick={() => setPromptAberto(null)}>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/45 backdrop-blur-sm" onClick={() => setPromptAberto(null)}>
               <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -5030,8 +6297,12 @@ function ConsultoriaPage() {
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-700 font-mono leading-relaxed mb-4">
                   Atue como especialista em {promptAberto.categoria.toLowerCase()}. Analise o seguinte contexto e forneça orientações metodológicas precisas, baseadas em evidências científicas recentes. Considere as especificidades do aluno e adapte sua resposta ao nível de profundidade necessário...
                 </div>
-                <button className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-slate-800 transition-colors fx-tap">
-                  <Copy className="w-4 h-4" /> Copiar prompt
+                <button
+                  onClick={handleCopiarPrompt}
+                  className={`w-full flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-xl transition-all fx-tap ${promptCopiado ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "text-white hover:opacity-90"}`}
+                  style={!promptCopiado ? { background: "#6578c4" } : {}}
+                >
+                  {promptCopiado ? <><Check className="w-4 h-4" /> Copiado</> : <><Copy className="w-4 h-4" /> Copiar prompt</>}
                 </button>
               </div>
             </div>
@@ -5055,6 +6326,7 @@ type Page =
   | "biblioteca"
   | "comunidade"
   | "admin"
+  | "editor"
   | "perfil"
   | "assinatura";
 
@@ -5084,6 +6356,7 @@ const navItems = [
   { id: "comunidade", label: "Comunidade", icon: Users },
   { divider: true },
   { id: "admin", label: "Painel Admin", icon: ShieldCheck },
+  { id: "editor", label: "Editor de Conteúdo", icon: Edit3 },
 ] as const;
 
 const bottomItems = [
@@ -5104,6 +6377,8 @@ function Sidebar({
   mobileOpen,
   setMobileOpen,
   onLogout,
+  isAdmin,
+  temConsultoria,
 }: {
   active: string;
   setActive: (p: Page) => void;
@@ -5112,6 +6387,8 @@ function Sidebar({
   mobileOpen: boolean;
   setMobileOpen: (v: boolean) => void;
   onLogout: () => void;
+  isAdmin: boolean;
+  temConsultoria: boolean;
 }) {
   const navRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ top: number; height: number; ready: boolean }>({
@@ -5163,6 +6440,7 @@ function Sidebar({
               "biblioteca",
               "comunidade",
               "admin",
+              "editor",
               "perfil",
               "assinatura",
             ].includes(item.id)
@@ -5172,7 +6450,7 @@ function Sidebar({
           }
         }}
         title={collapsed ? item.label : undefined}
-        className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left fx-tap transition-[background-color,color,box-shadow] duration-300 ease-out ${isActive ? "bg-blue-600 text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)]" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+        className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left fx-tap transition-[background-color,color,box-shadow] duration-300 ease-out ${isActive ? "bg-[#6578c4]/90 text-white shadow-[0_6px_20px_rgba(101,120,196,0.40)]" : "text-slate-300 hover:bg-white/8 hover:text-white"}`}
       >
         <Icon
           className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ease-out ${isActive ? "scale-110" : ""}`}
@@ -5208,31 +6486,28 @@ function Sidebar({
         style={{ height: "100vh" }}
       >
       <div
-        className={`flex items-center gap-2 px-3 py-4 border-b border-white/10 ${sidebarCollapsed ? "md:justify-center" : ""} justify-between`}
+        className={`flex items-center gap-2 px-3 py-4 ${sidebarCollapsed ? "md:justify-center" : ""} justify-between`}
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
       >
         {!sidebarCollapsed && (
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 bg-white/10 border border-white/15 rounded-md flex items-center justify-center backdrop-blur-sm shadow-sm flex-shrink-0">
-              <Star className="w-4 h-4 text-white" />
-            </div>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <BrandMark className="w-8 h-8 flex-shrink-0" />
             <div
               className="flex flex-col leading-tight min-w-0"
-              style={{
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-              }}
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
-              <span className="text-white font-bold text-sm truncate">
+              <span className="text-[#f9f3dd] font-bold text-sm truncate tracking-tight">
                 Pesquisa
               </span>
-              <span className="text-slate-300 text-[10px] font-medium uppercase tracking-wider truncate">
+              <span className="text-[10px] font-semibold uppercase tracking-widest truncate" style={{ color: "#c9a961" }}>
                 passo a passo
               </span>
             </div>
           </div>
         )}
         {sidebarCollapsed && (
-          <div className="hidden md:flex w-7 h-7 bg-white/10 border border-white/15 rounded-md items-center justify-center backdrop-blur-sm shadow-sm">
-            <Star className="w-4 h-4 text-white" />
+          <div className="hidden md:flex items-center justify-center">
+            <BrandMark className="w-8 h-8" />
           </div>
         )}
         {/* Fechar (mobile) */}
@@ -5261,7 +6536,7 @@ function Sidebar({
         {/* Indicador deslizante */}
         <span
           aria-hidden
-          className="pointer-events-none absolute left-0 w-[3px] rounded-r-full bg-white"
+          className="pointer-events-none absolute left-0 w-[3px] rounded-r-full bg-[#c9a961]"
           style={{
             top: indicator.top + 6,
             height: Math.max(0, indicator.height - 12),
@@ -5275,7 +6550,7 @@ function Sidebar({
             return !sidebarCollapsed ? (
               <div
                 key={i}
-                className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 pt-2 pb-1"
+                className="text-xs font-semibold uppercase tracking-widest px-2 pt-2 pb-1" style={{ color: "rgba(201,169,97,0.55)" }}
               >
                 {item.section}
               </div>
@@ -5287,6 +6562,12 @@ function Sidebar({
                 className="border-t border-white/10 my-2"
               />
             );
+          // Admin/Editor: só para admins
+          if ("id" in item && (item.id === "admin" || item.id === "editor") && !isAdmin)
+            return null;
+          // Consultoria: só para plano consultoria ou admin
+          if ("id" in item && item.id === "consultoria" && !temConsultoria && !isAdmin)
+            return null;
           return <NavBtn key={item.id} item={item} />;
         })}
       </div>
@@ -5306,7 +6587,7 @@ function Sidebar({
                   setMobileOpen(false);
                 }
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left fx-tap ${isActive ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-white/10 hover:text-white hover:translate-x-1"}`}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left fx-tap ${isActive ? "bg-[#6578c4] text-white" : "text-slate-400 hover:bg-white/10 hover:text-white hover:translate-x-1"}`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               {!sidebarCollapsed && (
@@ -5325,11 +6606,52 @@ function Sidebar({
 
 // ─── HEADER ────────────────────────────────────────────────────────────────
 
-function Header({ onOpenMenu, currentTitle, fotoUrl }: { onOpenMenu: () => void; currentTitle: string; fotoUrl: string }) {
-  const [notif, setNotif] = useState(true);
+const notificacoesData: { id: number; texto: string; tempo: string; lida: boolean; icon: ElementType; pagina: Page }[] = [
+  { id: 1, texto: "Novo módulo disponível: Mediação Moderada em R", tempo: "2h atrás", lida: false, icon: BookOpen, pagina: "plataforma" },
+  { id: 2, texto: "Novo GPT disponível: Gerador de Sintaxe R", tempo: "5h atrás", lida: false, icon: Bot, pagina: "gpts" },
+  { id: 3, texto: "Novo livro adicionado à biblioteca", tempo: "1d atrás", lida: true, icon: Library, pagina: "livros" },
+  { id: 4, texto: "Seu certificado foi emitido! Clique para baixar.", tempo: "2d atrás", lida: true, icon: Award, pagina: "certificados" },
+];
+
+const globalSearchItems = [
+  ...Object.values(trilhaCourses).flat().map((c) => ({ tipo: "Curso", nome: c.titulo })),
+  { tipo: "GPT", nome: "Assistente de Metodologia" },
+  { tipo: "GPT", nome: "Revisor APA 7ª Edição" },
+  { tipo: "GPT", nome: "Analisador de Dados SPSS" },
+  { tipo: "Prompt", nome: "Estrutura IMRaD" },
+  { tipo: "Prompt", nome: "Análise de Resultados" },
+  { tipo: "Livro", nome: "Métodos de Pesquisa em Ciências Sociais" },
+];
+
+function Header({ onOpenMenu, currentTitle, fotoUrl, onNavigatePerfil, onNavigate }: { onOpenMenu: () => void; currentTitle: string; fotoUrl: string; onNavigatePerfil: () => void; onNavigate: (page: Page) => void }) {
+  const { usuario, assinatura } = useAuthContext();
+  const [query, setQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [showNotif, setShowNotif] = useState(false);
+  const [showPerfil, setShowPerfil] = useState(false);
+  const [notifs, setNotifs] = useState(notificacoesData);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const perfilRef = useRef<HTMLDivElement>(null);
+
+  const naoLidas = notifs.filter((n) => !n.lida).length;
+
+  const resultados = query.trim().length > 1
+    ? globalSearchItems.filter((i) => i.nome.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
+    : [];
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowSearch(false);
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotif(false);
+      if (perfilRef.current && !perfilRef.current.contains(e.target as Node)) setShowPerfil(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   return (
-    <header className="h-14 bg-white/72 backdrop-blur-xl border-b border-white/70 flex items-center px-3 sm:px-5 gap-2 sm:gap-3 flex-shrink-0">
-      {/* Hambúrguer (mobile) */}
+    <header className="relative z-[100] h-14 bg-white/72 backdrop-blur-xl border-b border-white/70 flex items-center px-3 sm:px-5 gap-2 sm:gap-3 flex-shrink-0">
       <button
         onClick={onOpenMenu}
         className="md:hidden w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 fx-tap"
@@ -5337,7 +6659,6 @@ function Header({ onOpenMenu, currentTitle, fotoUrl }: { onOpenMenu: () => void;
       >
         <Menu className="w-4 h-4" />
       </button>
-      {/* Título da página visível no mobile */}
       <span
         className="md:hidden text-sm font-semibold text-slate-800 truncate"
         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
@@ -5345,24 +6666,132 @@ function Header({ onOpenMenu, currentTitle, fotoUrl }: { onOpenMenu: () => void;
         {currentTitle}
       </span>
       <div className="flex-1" />
-      <div className="relative hidden md:block">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+
+      {/* Search */}
+      <div ref={searchRef} className="relative hidden md:block">
+        <BrandSearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6578c4]" />
         <input
-          className="pl-9 pr-4 py-1.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
-          placeholder="Buscar..."
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setShowSearch(true); }}
+          onFocus={() => setShowSearch(true)}
+          className="pl-9 pr-4 py-1.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#6578c4] w-56 transition-all"
+          placeholder="Buscar cursos, GPTs, prompts..."
         />
-      </div>
-      <button
-        onClick={() => setNotif(!notif)}
-        className="relative w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:scale-105 transition-all fx-tap"
-      >
-        <Bell className="w-4 h-4" />
-        {notif && (
-          <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full fx-pulse-soft" />
+        {showSearch && resultados.length > 0 && (
+          <div className="absolute top-full left-0 mt-1 w-72 bg-white rounded-xl border border-slate-200 shadow-lg z-[9999] overflow-hidden">
+            {resultados.map((r, i) => (
+              <button
+                key={i}
+                onClick={() => { setQuery(""); setShowSearch(false); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-left transition-colors"
+              >
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "rgba(101,120,196,0.12)", color: "#6578c4" }}>{r.tipo}</span>
+                <span className="text-sm text-slate-700 truncate">{r.nome}</span>
+              </button>
+            ))}
+          </div>
         )}
-      </button>
-      <div className="w-9 h-9 rounded-full border-2 border-white shadow-sm overflow-hidden cursor-pointer hover:scale-105 hover:shadow-md fx-tap transition-all flex-shrink-0">
-        <img src={fotoUrl} alt="Perfil" className="w-full h-full object-cover" />
+        {showSearch && query.trim().length > 1 && resultados.length === 0 && (
+          <div className="absolute top-full left-0 mt-1 w-72 bg-white rounded-xl border border-slate-200 shadow-lg z-[9999] px-4 py-3 text-sm text-slate-500">
+            Nenhum resultado para "{query}"
+          </div>
+        )}
+      </div>
+
+      {/* Notifications */}
+      <div ref={notifRef} className="relative">
+        <button
+          onClick={() => setShowNotif(!showNotif)}
+          className="relative w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:scale-105 transition-all fx-tap"
+        >
+          <Bell className="w-4 h-4" />
+          {naoLidas > 0 && (
+            <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full fx-pulse-soft" />
+          )}
+        </button>
+        {showNotif && (
+          <div className="fixed top-14 right-14 w-80 bg-white rounded-xl border border-slate-200 shadow-xl z-[9999] overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+              <span className="text-sm font-semibold text-slate-800">Notificações</span>
+              {naoLidas > 0 && (
+                <button
+                  onClick={() => setNotifs((prev) => prev.map((n) => ({ ...n, lida: true })))}
+                  className="text-xs hover:underline" style={{ color: "#6578c4" }}
+                >
+                  Marcar todas como lidas
+                </button>
+              )}
+            </div>
+            <div className="max-h-72 overflow-y-auto">
+              {notifs.map((n) => {
+                const Icon = n.icon;
+                return (
+                  <button
+                    key={n.id}
+                    onClick={() => {
+                      setNotifs((prev) => prev.map((x) => x.id === n.id ? { ...x, lida: true } : x));
+                      setShowNotif(false);
+                      onNavigate(n.pagina);
+                    }}
+                    className={`w-full flex items-start gap-3 px-4 py-3 text-left border-b border-slate-100 last:border-0 transition-colors hover:bg-slate-50 ${!n.lida ? "bg-[#6578c4]/5" : ""}`}
+                  >
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(101,120,196,0.12)" }}>
+                      <Icon className="w-4 h-4" style={{ color: "#6578c4" }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs leading-snug ${!n.lida ? "text-slate-800 font-medium" : "text-slate-600"}`}>{n.texto}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{n.tempo}</p>
+                    </div>
+                    {!n.lida && <div className="w-2 h-2 rounded-full bg-[#6578c4] flex-shrink-0 mt-1.5" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Foto de perfil com dropdown */}
+      <div ref={perfilRef} className="relative flex-shrink-0">
+        <button
+          onClick={() => setShowPerfil((v) => !v)}
+          className="w-9 h-9 rounded-full border-2 border-white shadow-sm overflow-hidden hover:scale-105 hover:shadow-md fx-tap transition-all"
+        >
+          <img src={fotoUrl} alt="Perfil" className="w-full h-full object-cover" />
+        </button>
+
+        {showPerfil && (
+          <div className="fixed top-14 right-3 w-72 rounded-2xl border border-slate-200 shadow-2xl z-[9999] bg-white" style={{ boxShadow: "0 8px 40px rgba(10,10,58,0.18)" }}>
+            {/* Banner */}
+            <div className="h-16 rounded-t-2xl overflow-hidden bg-gradient-to-br from-[#0a0a3a] via-[#1e2a6e] to-[#6578c4] relative">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.18),transparent_70%)]" />
+            </div>
+            {/* Avatar sobreposto */}
+            <div className="px-5 pb-4">
+              <div className="relative -mt-7 mb-3 w-fit">
+                <div className="w-14 h-14 rounded-full border-[3px] border-white shadow-md overflow-hidden bg-slate-100">
+                  <img src={fotoUrl} alt="Perfil" className="w-full h-full object-cover" />
+                </div>
+                <div className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white" />
+              </div>
+              <p className="text-sm font-bold text-slate-800 leading-tight">{usuario?.nome ?? "Usuário"}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{assinatura?.planos?.nome === "consultoria" ? "Plano Consultoria" : assinatura ? "Plano Essencial" : "Sem plano ativo"}</p>
+              <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(101,120,196,0.1)", color: "#6578c4" }}>
+                  <Award className="w-2.5 h-2.5" /> Conquistas
+                </span>
+              </div>
+            </div>
+            <div className="border-t border-slate-100 px-2 py-2 space-y-0.5">
+              <button
+                onClick={() => { setShowPerfil(false); onNavigatePerfil(); }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+              >
+                <User className="w-4 h-4" style={{ color: "#6578c4" }} /> Ver perfil completo
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
@@ -5408,7 +6837,11 @@ const pageTitles: Record<
   },
   admin: {
     title: "Painel de Administração",
-    sub: "Assinaturas, receita, parcerias e editor de conteúdo",
+    sub: "Assinaturas, receita e parcerias",
+  },
+  editor: {
+    title: "Editor de Conteúdo",
+    sub: "Gerencie cursos, GPTs, prompts e livros da plataforma",
   },
   consultoria: {
     title: "Consultoria Individual",
@@ -5426,17 +6859,76 @@ const pageTitles: Record<
 
 // ─── APP ───────────────────────────────────────────────────────────────────
 
+function SemPlanoGate({ onVerPlanos }: { onVerPlanos: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6" style={{ background: "rgba(101,120,196,0.12)", border: "1px solid rgba(101,120,196,0.25)" }}>
+        <Lock className="w-8 h-8 text-[#6578c4]" />
+      </div>
+      <h2 className="text-xl font-bold text-slate-800 mb-2">Conteúdo exclusivo para assinantes</h2>
+      <p className="text-sm text-slate-500 mb-6 max-w-sm">Para acessar a plataforma você precisa de um plano ativo. Escolha o melhor para você.</p>
+      <button
+        onClick={onVerPlanos}
+        className="px-6 py-3 rounded-xl text-white font-semibold text-sm transition-all fx-tap"
+        style={{ background: "linear-gradient(135deg, #6578c4, #0a0a3a)" }}
+      >
+        Ver planos
+      </button>
+    </div>
+  );
+}
+
+function SemConsultoriaGate({ onVerPlanos }: { onVerPlanos: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6" style={{ background: "rgba(201,169,97,0.12)", border: "1px solid rgba(201,169,97,0.25)" }}>
+        <GraduationCap className="w-8 h-8 text-[#c9a961]" />
+      </div>
+      <h2 className="text-xl font-bold text-slate-800 mb-2">Disponível no plano Consultoria</h2>
+      <p className="text-sm text-slate-500 mb-6 max-w-sm">Este conteúdo é exclusivo para assinantes do plano Consultoria. Faça um upgrade para ter acesso.</p>
+      <button
+        onClick={onVerPlanos}
+        className="px-6 py-3 rounded-xl text-white font-semibold text-sm transition-all fx-tap"
+        style={{ background: "linear-gradient(135deg, #c9a961, #a07c30)" }}
+      >
+        Fazer upgrade
+      </button>
+    </div>
+  );
+}
+
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { session, loading, signOut, isAdmin, temPlano, temConsultoria } = useAuthContext();
   const [page, setPage] = useState<Page>("plataforma");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [perfilFoto, setPerfilFoto] = useState("https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&q=80");
-  const [perfilBanner, setPerfilBanner] = useState("https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&h=400&fit=crop&q=80");
+  const [perfilBanner, setPerfilBanner] = useState("");
 
-  if (!loggedIn) return <LoginPage onLogin={() => setLoggedIn(true)} />;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a3a]">
+      <RefreshCw className="w-8 h-8 text-[#6578c4] animate-spin" />
+    </div>
+  );
+
+  if (!session) return <LoginPage onLogin={() => {}} />;
+
+  // Páginas que qualquer logado acessa (mesmo sem plano)
+  const paginasLivres: Page[] = ["assinatura", "perfil", "parceria", "atendimento"];
 
   const renderPage = () => {
+    // Proteção de admin
+    if ((page === "admin" || page === "editor") && !isAdmin)
+      return <SemPlanoGate onVerPlanos={() => setPage("assinatura")} />;
+
+    // Proteção de plano (todas as páginas de conteúdo)
+    if (!temPlano && !paginasLivres.includes(page))
+      return <SemPlanoGate onVerPlanos={() => setPage("assinatura")} />;
+
+    // Proteção de consultoria
+    if (page === "consultoria" && !temConsultoria)
+      return <SemConsultoriaGate onVerPlanos={() => setPage("assinatura")} />;
+
     if (page === "plataforma") return <PlatformPage />;
     if (page === "parceria") return <ParceriaPage />;
     if (page === "livros") return <LivrosPage />;
@@ -5445,8 +6937,9 @@ export default function App() {
     if (page === "consultoria") return <ConsultoriaPage />;
     if (page === "gpts") return <GPTsPage />;
     if (page === "biblioteca") return <BibliotecaPage />;
-    if (page === "comunidade") return <ComunidadePage />;
+    if (page === "comunidade") return <ComunidadePage onNavigate={setPage} />;
     if (page === "admin") return <AdminPage />;
+    if (page === "editor") return <EditorPage />;
     if (page === "perfil") return <PerfilPage fotoUrl={perfilFoto} bannerUrl={perfilBanner} onUpdateFoto={setPerfilFoto} onUpdateBanner={setPerfilBanner} />;
     if (page === "assinatura") return <AssinaturaPage />;
     return null;
@@ -5455,7 +6948,7 @@ export default function App() {
   const { title, sub } = pageTitles[page];
 
   return (
-    <div className="app-shell flex h-screen overflow-hidden bg-transparent relative isolate">
+    <div id="app-layout" className="app-shell flex h-screen overflow-hidden bg-transparent relative isolate">
       <Sidebar
         active={page}
         setActive={setPage}
@@ -5463,10 +6956,12 @@ export default function App() {
         setCollapsed={setCollapsed}
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
-        onLogout={() => setLoggedIn(false)}
+        onLogout={signOut}
+        isAdmin={isAdmin}
+        temConsultoria={temConsultoria}
       />
       <div className="flex-1 flex flex-col overflow-hidden min-w-0 bg-white/65 backdrop-blur-xl">
-        <Header onOpenMenu={() => setMobileOpen(true)} currentTitle={title} fotoUrl={perfilFoto} />
+        <Header onOpenMenu={() => setMobileOpen(true)} currentTitle={title} fotoUrl={perfilFoto} onNavigatePerfil={() => setPage("perfil")} onNavigate={setPage} />
         <main className="flex-1 overflow-y-auto bg-transparent px-3 sm:px-5 lg:px-7 py-4 sm:py-6">
           <div className="page-swap relative overflow-hidden rounded-2xl border border-slate-200 bg-white/88 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(255,255,255,0.18)_40%,rgba(255,255,255,0.06))]" />
