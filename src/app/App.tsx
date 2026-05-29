@@ -127,6 +127,10 @@ import {
   Mail,
   Lock,
   GraduationCap,
+  Video,
+  CalendarClock,
+  PlayCircle,
+  Radio,
 } from "lucide-react";
 import {
   AreaChart,
@@ -157,6 +161,8 @@ import * as cursosApi from "../lib/api/cursos";
 import * as storageApi from "../lib/api/storage";
 import * as assinaturasApi from "../lib/api/assinaturas";
 import * as livrosApi from "../lib/api/livros";
+import * as livesApi from "../lib/api/lives";
+import type { Live } from "../lib/api/lives";
 import { notifyAdmin } from "../lib/api/notifications";
 import { StripeCheckout } from "./components/StripeCheckout";
 
@@ -4479,7 +4485,7 @@ function ComunidadePage({ onNavigate }: { onNavigate?: (page: Page) => void }) {
 // ─── PAGE: ADMIN ──────────────────────────────────────────────────────────
 
 type AdminTab = "overview" | "assinaturas" | "receita" | "parcerias";
-type EditorTab = "curso" | "gpt" | "prompt" | "livro";
+type EditorTab = "curso" | "gpt" | "prompt" | "livro" | "live";
 
 function StatCard({ label, value, sub, icon: Icon, trend, color = "slate" }: { label: string; value: string; sub: string; icon: ElementType; trend?: string; color?: string; }) {
   const colors: Record<string, string> = { slate: "bg-slate-50 text-slate-700", blue: "bg-[#6578c4]/10 text-[#5568b3]", emerald: "bg-emerald-50 text-emerald-700", amber: "bg-amber-50 text-amber-700" };
@@ -5065,6 +5071,11 @@ function EditorPage() {
   const [gptForm, setGptForm] = useState({ titulo: "", descricao: "", url: "", categoria: "" });
   const [promptForm, setPromptForm] = useState({ titulo: "", descricao: "", conteudo: "", categoria: "" });
   const [livroForm, setLivroForm] = useState({ titulo: "", area: "" });
+  const [liveForm, setLiveForm] = useState({
+    titulo: "", descricao: "", data_inicio: "", duracao_min: 90,
+    url_acesso: "", url_gravacao: "", plano_minimo: "essencial" as "essencial" | "consultoria",
+    publicado: false,
+  });
 
   const mostrarFeedback = (tipo: "ok" | "erro", texto: string) => {
     setFeedbackMsg({ tipo, texto });
@@ -5132,6 +5143,28 @@ function EditorPage() {
     setLivroForm({ titulo: "", area: "" });
   };
 
+  const salvarLive = async () => {
+    if (!liveForm.titulo.trim()) { mostrarFeedback("erro", "Título obrigatório."); return; }
+    if (!liveForm.data_inicio) { mostrarFeedback("erro", "Data e hora obrigatórias."); return; }
+    setSalvando(true);
+    const { error } = await livesApi.createLive({
+      titulo: liveForm.titulo,
+      descricao: liveForm.descricao || null,
+      data_inicio: new Date(liveForm.data_inicio).toISOString(),
+      duracao_min: liveForm.duracao_min,
+      url_acesso: liveForm.url_acesso || null,
+      url_gravacao: liveForm.url_gravacao || null,
+      thumbnail_url: null,
+      status: "agendada",
+      plano_minimo: liveForm.plano_minimo,
+      publicado: liveForm.publicado,
+    });
+    setSalvando(false);
+    if (error) { mostrarFeedback("erro", "Erro ao salvar live."); return; }
+    mostrarFeedback("ok", "Live agendada com sucesso!");
+    setLiveForm({ titulo: "", descricao: "", data_inicio: "", duracao_min: 90, url_acesso: "", url_gravacao: "", plano_minimo: "essencial", publicado: false });
+  };
+
   // categorias expansíveis por tipo
   const [catsCurso, setCatsCurso] = useState(["Estatística","Metodologia","Escrita Científica","Psicometria","Pesquisa Qualitativa","Ferramentas","Carreira"]);
   const [catsGPT, setCatsGPT] = useState(["Análise","Metodologia","Escrita","Produtividade"]);
@@ -5192,9 +5225,9 @@ function EditorPage() {
     <div className="space-y-5">
       {/* Tab selector */}
       <div className="flex items-center gap-1 overflow-x-auto bg-slate-100 p-1 rounded-xl w-fit">
-        {(["curso", "gpt", "prompt", "livro"] as EditorTab[]).map((et) => (
+        {(["curso", "gpt", "prompt", "livro", "live"] as EditorTab[]).map((et) => (
           <button key={et} onClick={() => setEditorTab(et)} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${editorTab === et ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
-            {et === "gpt" ? "GPT" : et.charAt(0).toUpperCase() + et.slice(1)}
+            {et === "gpt" ? "GPT" : et === "live" ? "Aula ao Vivo" : et.charAt(0).toUpperCase() + et.slice(1)}
           </button>
         ))}
       </div>
@@ -5370,6 +5403,197 @@ function EditorPage() {
           )}
           <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
             <button onClick={salvarLivro} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar Livro"}</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── LIVE ── */}
+      {editorTab === "live" && (
+        <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-6 space-y-5 fx-fade">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <Video className="w-4 h-4 text-[#6578c4]" strokeWidth={1.5} />
+            Agendar / Editar Aula ao Vivo
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <Label>Título da Live</Label>
+              <Input placeholder="Ex: Modelagem de Equações Estruturais na prática" value={liveForm.titulo} onChange={(v) => setLiveForm((f) => ({ ...f, titulo: v }))} />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Descrição (opcional)</Label>
+              <textarea rows={2} value={liveForm.descricao} onChange={(e) => setLiveForm((f) => ({ ...f, descricao: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 resize-none bg-white"
+                placeholder="O que será abordado nessa live..." />
+            </div>
+            <div>
+              <Label>Data e Hora</Label>
+              <input type="datetime-local" value={liveForm.data_inicio} onChange={(e) => setLiveForm((f) => ({ ...f, data_inicio: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" />
+            </div>
+            <div>
+              <Label>Duração (minutos)</Label>
+              <input type="number" min={30} max={360} value={liveForm.duracao_min} onChange={(e) => setLiveForm((f) => ({ ...f, duracao_min: Number(e.target.value) }))}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Link de Acesso (Zoom / Google Meet / YouTube)</Label>
+              <Input placeholder="https://zoom.us/j/..." value={liveForm.url_acesso} onChange={(v) => setLiveForm((f) => ({ ...f, url_acesso: v }))} />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Link da Gravação (YouTube — preencher após a live)</Label>
+              <Input placeholder="https://youtube.com/watch?v=..." value={liveForm.url_gravacao} onChange={(v) => setLiveForm((f) => ({ ...f, url_gravacao: v }))} />
+            </div>
+            <div>
+              <Label>Acesso mínimo</Label>
+              <select value={liveForm.plano_minimo} onChange={(e) => setLiveForm((f) => ({ ...f, plano_minimo: e.target.value as "essencial" | "consultoria" }))}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white">
+                <option value="essencial">Todos os planos</option>
+                <option value="consultoria">Apenas Consultoria</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3 mt-6">
+              <input type="checkbox" id="live-pub" checked={liveForm.publicado} onChange={(e) => setLiveForm((f) => ({ ...f, publicado: e.target.checked }))}
+                className="w-4 h-4 accent-[#6578c4]" />
+              <label htmlFor="live-pub" className="text-sm text-slate-700 font-medium">Publicar (visível para alunos)</label>
+            </div>
+          </div>
+
+          {feedbackMsg && editorTab === "live" && (
+            <p className={`text-xs font-semibold flex items-center gap-1 ${feedbackMsg.tipo === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+              {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
+            </p>
+          )}
+          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <button onClick={salvarLive} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}>
+              <Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Agendar Live"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── LIVES PAGE ────────────────────────────────────────────────────────────
+
+function LivesPage() {
+  const { data: lives, loading } = useSupabaseQuery(() => livesApi.getLives(), []);
+
+  const agora = new Date();
+  const proximas = (lives ?? []).filter((l) => l.status !== "encerrada" && new Date(l.data_inicio) >= agora);
+  const gravacoes = (lives ?? []).filter((l) => l.status === "encerrada" && l.url_gravacao);
+  const aoVivo = (lives ?? []).find((l) => l.status === "ao_vivo");
+
+  function fmtData(iso: string) {
+    return new Date(iso).toLocaleString("pt-BR", {
+      weekday: "long", day: "2-digit", month: "long", year: "numeric",
+      hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo",
+    });
+  }
+
+  function fmtDataCurta(iso: string) {
+    return new Date(iso).toLocaleDateString("pt-BR", {
+      day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo",
+    });
+  }
+
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <RefreshCw className="w-6 h-6 text-[#6578c4] animate-spin" />
+    </div>
+  );
+
+  return (
+    <div className="space-y-8 max-w-4xl mx-auto">
+
+      {/* Live agora */}
+      {aoVivo && (
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#0a0a3a] via-[#1e2a6e] to-[#6578c4] p-6 text-white shadow-xl">
+          <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-red-500 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse">
+            <Radio className="w-3 h-3" /> AO VIVO
+          </div>
+          <h2 className="text-xl font-bold mb-1 pr-24">{aoVivo.titulo}</h2>
+          {aoVivo.descricao && <p className="text-[#c5cdf0] text-sm mb-4">{aoVivo.descricao}</p>}
+          {aoVivo.url_acesso && (
+            <a href={aoVivo.url_acesso} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white text-[#0a0a3a] font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-slate-100 transition-colors">
+              <PlayCircle className="w-4 h-4" /> Entrar na Live
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Próximas lives */}
+      <div>
+        <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <CalendarClock className="w-4 h-4 text-[#6578c4]" /> Próximas Aulas ao Vivo
+        </h3>
+        {proximas.length === 0 ? (
+          <div className="text-center py-12 rounded-2xl bg-white border border-slate-100 text-slate-400 text-sm">
+            Nenhuma live agendada no momento. Fique de olho nas novidades!
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {proximas.map((live) => (
+              <div key={live.id} className="bg-white border border-slate-100 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-[#f4f1e8] flex flex-col items-center justify-center border border-slate-200">
+                  <span className="text-xs font-bold text-[#6578c4] uppercase">
+                    {new Date(live.data_inicio).toLocaleDateString("pt-BR", { month: "short", timeZone: "America/Sao_Paulo" })}
+                  </span>
+                  <span className="text-xl font-extrabold text-[#0a0a3a] leading-none">
+                    {new Date(live.data_inicio).toLocaleDateString("pt-BR", { day: "2-digit", timeZone: "America/Sao_Paulo" })}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-slate-800 text-sm truncate">{live.titulo}</h4>
+                  <p className="text-xs text-slate-500 mt-0.5">{fmtData(live.data_inicio)}</p>
+                  {live.descricao && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{live.descricao}</p>}
+                </div>
+                <div className="flex-shrink-0">
+                  {live.url_acesso ? (
+                    <a href={live.url_acesso} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl text-white hover:opacity-90 transition-opacity"
+                      style={{ background: "#6578c4" }}>
+                      <Video className="w-3.5 h-3.5" /> Acessar
+                    </a>
+                  ) : (
+                    <span className="text-xs text-slate-400 font-medium px-3 py-2 rounded-xl bg-slate-100">Em breve</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Gravações */}
+      {gravacoes.length > 0 && (
+        <div>
+          <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <PlayCircle className="w-4 h-4 text-[#6578c4]" /> Gravações Anteriores
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {gravacoes.map((live) => (
+              <a key={live.id} href={live.url_gravacao!} target="_blank" rel="noopener noreferrer"
+                className="group bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all block">
+                <div className="relative h-36 bg-slate-900 flex items-center justify-center">
+                  {live.thumbnail_url
+                    ? <img src={live.thumbnail_url} alt={live.titulo} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    : <Video className="w-10 h-10 text-white/40" />
+                  }
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                      <PlayCircle className="w-7 h-7 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h4 className="text-sm font-semibold text-slate-800 line-clamp-2">{live.titulo}</h4>
+                  <p className="text-xs text-slate-400 mt-1">{fmtDataCurta(live.data_inicio)} · {live.duracao_min} min</p>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       )}
@@ -6325,6 +6549,7 @@ type Page =
   | "gpts"
   | "biblioteca"
   | "comunidade"
+  | "lives"
   | "admin"
   | "editor"
   | "perfil"
@@ -6354,6 +6579,7 @@ const navItems = [
     icon: Library,
   },
   { id: "comunidade", label: "Comunidade", icon: Users },
+  { id: "lives", label: "Aulas ao Vivo", icon: Video },
   { divider: true },
   { id: "admin", label: "Painel Admin", icon: ShieldCheck },
   { id: "editor", label: "Editor de Conteúdo", icon: Edit3 },
@@ -6835,6 +7061,10 @@ const pageTitles: Record<
     title: "Comunidade",
     sub: "Discussões, dúvidas e trocas entre pesquisadores",
   },
+  lives: {
+    title: "Aulas ao Vivo",
+    sub: "Próximas lives, gravações e calendário de eventos",
+  },
   admin: {
     title: "Painel de Administração",
     sub: "Assinaturas, receita e parcerias",
@@ -6938,6 +7168,7 @@ export default function App() {
     if (page === "gpts") return <GPTsPage />;
     if (page === "biblioteca") return <BibliotecaPage />;
     if (page === "comunidade") return <ComunidadePage onNavigate={setPage} />;
+    if (page === "lives") return <LivesPage />;
     if (page === "admin") return <AdminPage />;
     if (page === "editor") return <EditorPage />;
     if (page === "perfil") return <PerfilPage fotoUrl={perfilFoto} bannerUrl={perfilBanner} onUpdateFoto={setPerfilFoto} onUpdateBanner={setPerfilBanner} />;
