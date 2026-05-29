@@ -168,102 +168,9 @@ import { StripeCheckout } from "./components/StripeCheckout";
 
 // ─── DATA ──────────────────────────────────────────────────────────────────
 
-const cursosData = [
-  {
-    id: 1,
-    nome: "Análises Bi e Multivariadas (JASP)",
-    progress: 100,
-    cat: "Estatística",
-  },
-  {
-    id: 2,
-    nome: "Análises Bi e Multivariadas (SPSS)",
-    progress: 75,
-    cat: "Estatística",
-  },
-  {
-    id: 3,
-    nome: "Escrita Científica de Alto Impacto",
-    progress: 100,
-    cat: "Escrita",
-  },
-  {
-    id: 4,
-    nome: "Metodologia Científica",
-    progress: 40,
-    cat: "Metodologia",
-  },
-  {
-    id: 5,
-    nome: "Análise de Mediação e Moderação",
-    progress: 100,
-    cat: "Estatística",
-  },
-  {
-    id: 6,
-    nome: "Análise de Redes",
-    progress: 15,
-    cat: "Estatística",
-  },
-  {
-    id: 7,
-    nome: "Objetiv Connect",
-    progress: 60,
-    cat: "Comunidade",
-  },
-];
+const cursosData: { id: number; nome: string; progress: number; cat: string }[] = [];
 
-const rankingData = [
-  {
-    pos: 1,
-    nome: "Sandro Alves de Medeiros",
-    xp: 129605,
-    ativ: 3374,
-    badges: ["Destaque", "Referência"],
-  },
-  {
-    pos: 2,
-    nome: "Samara Ernandes Adamczuk",
-    xp: 119512,
-    ativ: 3120,
-    badges: ["Destaque"],
-  },
-  {
-    pos: 3,
-    nome: "Vinicius Ilha de Arruda",
-    xp: 115307,
-    ativ: 2990,
-    badges: ["Referência"],
-  },
-  {
-    pos: 4,
-    nome: "Ana Carolina Fernandes",
-    xp: 98400,
-    ativ: 2567,
-    badges: ["Destaque"],
-  },
-  {
-    pos: 5,
-    nome: "Ricardo Monteiro Santos",
-    xp: 87230,
-    ativ: 2145,
-    badges: [],
-  },
-  {
-    pos: 6,
-    nome: "Patricia Lima Oliveira",
-    xp: 76890,
-    ativ: 1989,
-    badges: [],
-  },
-  {
-    pos: 7,
-    nome: "Marcos Paulo Almeida",
-    xp: 65430,
-    ativ: 1756,
-    badges: [],
-  },
-];
+const rankingData: { pos: number; nome: string; xp: number; ativ: number; badges: string[] }[] = [];
 
 const sugestoesData = [
   {
@@ -1323,66 +1230,8 @@ const postsComunidade = [
   },
 ];
 
-const eventosProximos = [
-  { titulo: "Live: SEM no lavaan", data: "25 mai · 20h", tipo: "Live" },
-  { titulo: "Workshop: Meta-análise prática", data: "28 mai · 19h", tipo: "Workshop" },
-  { titulo: "Encontro mensal Sandri", data: "02 jun · 20h", tipo: "Encontro" },
-];
-
 // ─── DATA: ADMIN ──────────────────────────────────────────────────────────
-
-const assinaturasData = [
-  { id: 1, nome: "Sandro Alves de Medeiros", email: "sandro@ufrgs.br", plano: "Consultoria", status: "Ativo", inicio: "Jan 2025", valor: 197 },
-  { id: 2, nome: "Samara Ernandes Adamczuk", email: "samara@usp.br", plano: "Essencial", status: "Ativo", inicio: "Fev 2025", valor: 97 },
-  { id: 3, nome: "Vinicius Ilha de Arruda", email: "vinicius@ufpr.br", plano: "Consultoria", status: "Ativo", inicio: "Jan 2025", valor: 197 },
-  { id: 4, nome: "Ana Carolina Fernandes", email: "ana@fiocruz.br", plano: "Essencial", status: "Ativo", inicio: "Mar 2025", valor: 97 },
-  { id: 5, nome: "Ricardo Monteiro Santos", email: "ricardo@ufmg.br", plano: "Essencial", status: "Ativo", inicio: "Abr 2025", valor: 97 },
-  { id: 6, nome: "Patricia Lima Oliveira", email: "patricia@unb.br", plano: "Consultoria", status: "Pausado", inicio: "Nov 2024", valor: 197 },
-  { id: 7, nome: "Marcos Paulo Almeida", email: "marcos@unicamp.br", plano: "Essencial", status: "Ativo", inicio: "Mai 2025", valor: 97 },
-  { id: 8, nome: "Juliana Costa Ribeiro", email: "juliana@puc.br", plano: "Consultoria", status: "Ativo", inicio: "Jan 2025", valor: 197 },
-  { id: 9, nome: "Bruno Ferreira Nunes", email: "bruno@ufsc.br", plano: "Essencial", status: "Ativo", inicio: "Mar 2025", valor: 97 },
-  { id: 10, nome: "Camila Souza Borges", email: "camila@ufba.br", plano: "Consultoria", status: "Cancelado", inicio: "Out 2024", valor: 197 },
-];
-
-const receitaData = [
-  { mes: "Jan", receita: 18420, assinaturas: 62 },
-  { mes: "Fev", receita: 21150, assinaturas: 71 },
-  { mes: "Mar", receita: 24800, assinaturas: 84 },
-  { mes: "Abr", receita: 27640, assinaturas: 93 },
-  { mes: "Mai", receita: 31200, assinaturas: 105 },
-];
-
-const acessosData = [
-  { dia: "Seg", acessos: 124 },
-  { dia: "Ter", acessos: 156 },
-  { dia: "Qua", acessos: 198 },
-  { dia: "Qui", acessos: 171 },
-  { dia: "Sex", acessos: 243 },
-  { dia: "Sáb", acessos: 89 },
-  { dia: "Dom", acessos: 67 },
-];
-
-const distribuicaoPlanos = [
-  { name: "Consultoria", value: 52, color: "#0a0a3a" },
-  { name: "Essencial", value: 41, color: "#6578c4" },
-  { name: "Institucional", value: 7, color: "#c9a961" },
-];
-
-const parceirosAdmin = [
-  { id: 1, nome: "UFRGS", tipo: "Universidade Federal", cidade: "Porto Alegre, RS", vagas: 50, plano: "Premium", inicio: "Mar 2025", status: "Ativo", contato: "reitoria@ufrgs.br", totalPago: 14850 },
-  { id: 2, nome: "USP", tipo: "Universidade Federal", cidade: "São Paulo, SP", vagas: 120, plano: "Premium", inicio: "Jan 2025", status: "Ativo", contato: "pos@usp.br", totalPago: 35640 },
-  { id: 3, nome: "Fiocruz", tipo: "Instituto de Pesquisa", cidade: "Rio de Janeiro, RJ", vagas: 30, plano: "Pro", inicio: "Abr 2025", status: "Ativo", contato: "pesquisa@fiocruz.br", totalPago: 5910 },
-  { id: 4, nome: "UFMG", tipo: "Universidade Federal", cidade: "Belo Horizonte, MG", vagas: 40, plano: "Premium", inicio: "Fev 2025", status: "Ativo", contato: "posgr@ufmg.br", totalPago: 11880 },
-  { id: 5, nome: "PUC-RS", tipo: "Universidade Privada", cidade: "Porto Alegre, RS", vagas: 25, plano: "Pro", inicio: "Mai 2025", status: "Em Negociação", contato: "inovacao@pucrs.br", totalPago: 0 },
-];
-
-const atividadeRecente = [
-  { tipo: "assinatura", texto: "Nova assinatura Premium — Bruno Ferreira", tempo: "há 2 min" },
-  { tipo: "parceria", texto: "PUC-RS enviou proposta de parceria", tempo: "há 18 min" },
-  { tipo: "cancelamento", texto: "Camila Souza cancelou assinatura", tempo: "há 1 h" },
-  { tipo: "assinatura", texto: "Nova assinatura Pro — Marcos Paulo", tempo: "há 3 h" },
-  { tipo: "parceria", texto: "USP renovou contrato por mais 12 meses", tempo: "há 5 h" },
-];
+// Todos os dados admin agora vêm do Supabase em tempo real (AdminPage/AdminParceriasTab)
 
 // ─── DATA: LIVROS METODOLÓGICOS ───────────────────────────────────────────
 
@@ -3918,6 +3767,29 @@ function LivrosPage() {
 
 // ─── PAGE: COMUNIDADE ──────────────────────────────────────────────────────
 
+function ProximasLivesSidebar() {
+  const { data: lives } = useSupabaseQuery(() => livesApi.getLives(), []);
+  const proximas = (lives ?? []).filter((l) => l.status !== "encerrada").slice(0, 3);
+  if (proximas.length === 0) return null;
+  return (
+    <div className="mt-6 pt-5 border-t border-slate-100">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-2 flex items-center gap-1.5">
+        <Video className="w-3 h-3" strokeWidth={2} /> Próximas Lives
+      </div>
+      <div className="px-2 space-y-3 text-xs">
+        {proximas.map((e) => (
+          <div key={e.id}>
+            <div className="text-slate-700 font-medium leading-snug">{e.titulo}</div>
+            <div className="text-slate-400 mt-0.5">
+              {new Date(e.data_inicio).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", timeZone: "America/Sao_Paulo" })} · {new Date(e.data_inicio).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ComunidadePage({ onNavigate }: { onNavigate?: (page: Page) => void }) {
   const { usuario } = useAuthContext();
   const [canalAtivo, setCanalAtivo] = useState("todos");
@@ -4128,19 +4000,7 @@ function ComunidadePage({ onNavigate }: { onNavigate?: (page: Page) => void }) {
             })}
           </nav>
 
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-2">
-              Acontece agora
-            </div>
-            <div className="px-2 space-y-3 text-xs">
-              {eventosProximos.map((e, i) => (
-                <div key={i}>
-                  <div className="text-slate-700 font-medium leading-snug">{e.titulo}</div>
-                  <div className="text-slate-400 mt-0.5">{e.data}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ProximasLivesSidebar />
 
           <div className="mt-6 pt-5 border-t border-slate-100">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-2 flex items-center gap-1.5">
@@ -4406,28 +4266,6 @@ function ComunidadePage({ onNavigate }: { onNavigate?: (page: Page) => void }) {
                   {/* Comentários expandidos */}
                   {comOpen && (
                     <div className="mt-3 pt-3 border-t border-slate-100 space-y-3 fx-rise">
-                      {/* Comentário fake exemplo */}
-                      <div className="flex items-start gap-2.5">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-semibold text-white flex-shrink-0 ${avatarColors[(idx + 2) % avatarColors.length]}`}>
-                          {getInitials(rankingData[(idx + 1) % rankingData.length].nome)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="bg-slate-50 rounded-2xl px-3.5 py-2">
-                            <div className="text-xs font-semibold text-slate-800">
-                              {rankingData[(idx + 1) % rankingData.length].nome}
-                            </div>
-                            <div className="text-sm text-slate-700 leading-snug mt-0.5">
-                              Excelente ponto! Eu costumo apresentar o gráfico de interação primeiro, justamente para guiar a leitura das comparações.
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 mt-1 px-3 text-[11px] text-slate-400">
-                            <button className="hover:text-slate-700 transition-colors">Curtir</button>
-                            <button className="hover:text-slate-700 transition-colors">Responder</button>
-                            <span>2 min</span>
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Input de comentário */}
                       <div className="flex items-start gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-[#1e3a5f] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
@@ -4502,6 +4340,59 @@ function StatCard({ label, value, sub, icon: Icon, trend, color = "slate" }: { l
   );
 }
 
+function AdminParceriasTab() {
+  const { data: parcerias, loading, refetch } = useSupabaseQuery(() => parceriasApi.getParcerias(), []);
+  const lista = parcerias ?? [];
+  const ativas = lista.filter((p) => p.status === "ativa").length;
+  const pendentes = lista.filter((p) => p.status === "pendente").length;
+
+  const handleStatus = async (id: string, status: "ativa" | "inativa" | "pendente") => {
+    await parceriasApi.updateStatusParceria(id, status);
+    refetch();
+  };
+
+  return (
+    <div className="space-y-4 fx-fade">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatCard label="Parcerias Ativas" value={String(ativas)} sub="instituições" icon={Building2} color="blue" />
+        <StatCard label="Solicitações Pendentes" value={String(pendentes)} sub="aguardando aprovação" icon={RefreshCw} color="amber" />
+        <StatCard label="Total Recebidas" value={String(lista.length)} sub="histórico" icon={Handshake} color="slate" />
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-12"><RefreshCw className="w-5 h-5 animate-spin text-[#6578c4]" /></div>
+      ) : lista.length === 0 ? (
+        <div className="text-center py-12 text-sm text-slate-400 border border-dashed border-slate-200 rounded-xl">Nenhuma solicitação de parceria ainda.</div>
+      ) : (
+        <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <div className="col-span-3">Responsável</div><div className="col-span-2">Instituição</div><div className="col-span-2">E-mail</div><div className="col-span-3">Mensagem</div><div className="col-span-2">Status</div>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {lista.map((p) => (
+              <div key={p.id} className="px-5 py-4 hover:bg-slate-50/60 sm:grid sm:grid-cols-12 sm:gap-4 sm:items-center flex flex-col gap-1.5">
+                <div className="sm:col-span-3 text-sm font-medium text-slate-800">{p.nome}</div>
+                <div className="sm:col-span-2 text-xs text-slate-500">{p.instituicao ?? "—"}</div>
+                <div className="sm:col-span-2 text-xs text-slate-500 truncate">{p.email}</div>
+                <div className="sm:col-span-3 text-xs text-slate-400 line-clamp-2">{p.mensagem ?? "—"}</div>
+                <div className="sm:col-span-2 flex gap-1.5 flex-wrap">
+                  {p.status === "pendente" && (
+                    <button onClick={() => handleStatus(p.id, "ativa")} className="text-[11px] px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors">Aprovar</button>
+                  )}
+                  {p.status !== "inativa" && (
+                    <button onClick={() => handleStatus(p.id, "inativa")} className="text-[11px] px-2 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors">Reprovar</button>
+                  )}
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium self-center ${p.status === "ativa" ? "bg-emerald-50 text-emerald-700" : p.status === "pendente" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-500"}`}>{p.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AdminPage() {
   const [tab, setTab] = useState<AdminTab>("overview");
   const [assBusca, setAssBusca] = useState("");
@@ -4571,10 +4462,9 @@ function AdminPage() {
     const plano = a.planos?.nome ?? "";
     return (assFiltro === "Todos" || plano === assFiltro || status === assFiltro) && nome.toLowerCase().includes(assBusca.toLowerCase());
   });
-  const totalAtivos = metricas?.totalAssinaturasAtivas ?? assinaturasData.filter((a) => a.status === "Ativo").length;
-  const receitaMes = metricas?.receitaMensal ?? receitaData[receitaData.length - 1].receita;
-  const acessosHoje = acessosData[acessosData.length - 2].acessos;
-  const parceirosAtivos = metricas?.totalParcerias ?? parceirosAdmin.filter((p) => p.status === "Ativo").length;
+  const totalAtivos = metricas?.totalAssinaturasAtivas ?? 0;
+  const receitaMes = metricas?.receitaMensal ?? 0;
+  const parceirosAtivos = metricas?.totalParcerias ?? 0;
 
   const statusBadge = (s: string) => {
     if (s === "Ativo") return "bg-emerald-50 text-emerald-700 border border-emerald-200";
@@ -4601,91 +4491,76 @@ function AdminPage() {
       {tab === "overview" && (
         <div className="space-y-6 fx-fade">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 fx-stagger-grid">
-            <StatCard label="Assinantes Ativos" value={String(totalAtivos)} sub="dos últimos 30 dias" icon={UserCheck} trend="+12%" color="blue" />
-            <StatCard label="Receita Mensal" value={`R$ ${receitaMes.toLocaleString("pt-BR")}`} sub="Mai 2026" icon={DollarSign} trend="+13%" color="emerald" />
-            <StatCard label="Acessos Hoje" value={String(acessosHoje)} sub="pico às 18h" icon={Activity} trend="+8%" color="amber" />
-            <StatCard label="Parcerias Ativas" value={String(parceirosAtivos)} sub={`${parceirosAdmin.filter((p) => p.status === "Em Negociação").length} em negociação`} icon={Handshake} color="slate" />
+            <StatCard label="Assinantes Ativos" value={String(totalAtivos)} sub="assinaturas ativas" icon={UserCheck} color="blue" />
+            <StatCard label="Receita Mensal" value={`R$ ${receitaMes.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} sub="estimativa atual" icon={DollarSign} color="emerald" />
+            <StatCard label="Total de Alunos" value={String(metricas?.totalAlunos ?? 0)} sub="cadastrados na plataforma" icon={Activity} color="amber" />
+            <StatCard label="Parcerias Ativas" value={String(parceirosAtivos)} sub="parcerias vigentes" icon={Handshake} color="slate" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div><div className="text-sm font-semibold text-slate-800">Receita Mensal</div><div className="text-xs text-slate-400 mt-0.5">Jan – Mai 2026</div></div>
-                <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full"><ArrowUpRight className="w-3 h-3" /> +69% no período</span>
+              <div className="text-sm font-semibold text-slate-800 mb-1">Resumo Financeiro</div>
+              <div className="text-xs text-slate-400 mb-4">Baseado nas assinaturas ativas</div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-[#f4f1e8] rounded-xl p-4">
+                  <div className="text-xs text-slate-500 mb-1">Receita Mensal Recorrente</div>
+                  <div className="text-2xl font-bold text-[#0a0a3a]">R$ {receitaMes.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</div>
+                </div>
+                <div className="bg-[#f4f1e8] rounded-xl p-4">
+                  <div className="text-xs text-slate-500 mb-1">Total de Alunos</div>
+                  <div className="text-2xl font-bold text-[#0a0a3a]">{metricas?.totalAlunos ?? 0}</div>
+                </div>
               </div>
-              <ResponsiveContainer width="100%" height={180}>
-                <AreaChart data={receitaData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="recGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6578c4" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#6578c4" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0", background: "white" }} formatter={(v: number) => [`R$ ${v.toLocaleString("pt-BR")}`, "Receita"]} />
-                  <Area type="monotone" dataKey="receita" stroke="#6578c4" strokeWidth={2} fill="url(#recGrad)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              <p className="text-xs text-slate-400 mt-4">Gráficos históricos disponíveis após integração com Stripe Analytics.</p>
             </div>
 
             <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
               <div className="text-sm font-semibold text-slate-800 mb-1">Distribuição de Planos</div>
-              <div className="text-xs text-slate-400 mb-3">por % de assinantes</div>
-              <div className="flex justify-center mb-3">
-                <PieChart width={150} height={150}>
-                  <Pie data={distribuicaoPlanos} cx={70} cy={70} innerRadius={44} outerRadius={68} paddingAngle={3} dataKey="value">
-                    {distribuicaoPlanos.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                  </Pie>
-                </PieChart>
-              </div>
-              <div className="space-y-2">
-                {distribuicaoPlanos.map((p) => (
-                  <div key={p.name} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full" style={{ background: p.color }} /><span className="text-slate-600">{p.name}</span></div>
-                    <span className="font-semibold text-slate-700">{p.value}%</span>
+              <div className="text-xs text-slate-400 mb-3">assinantes por plano</div>
+              {(() => {
+                const planoCount: Record<string, number> = {};
+                assRealData.forEach((a) => { const n = a.planos?.nome ?? "Desconhecido"; planoCount[n] = (planoCount[n] ?? 0) + 1; });
+                const total = Object.values(planoCount).reduce((s, v) => s + v, 0) || 1;
+                const cores: Record<string, string> = { essencial: "#6578c4", consultoria: "#0a0a3a" };
+                return (
+                  <div className="space-y-3">
+                    {Object.entries(planoCount).map(([nome, count]) => (
+                      <div key={nome}>
+                        <div className="flex justify-between text-xs mb-1"><span className="text-slate-600 capitalize">{nome}</span><span className="font-semibold">{count} ({Math.round(count / total * 100)}%)</span></div>
+                        <div className="w-full bg-slate-100 rounded-full h-2"><div className="h-2 rounded-full" style={{ width: `${count / total * 100}%`, background: cores[nome] ?? "#94a3b8" }} /></div>
+                      </div>
+                    ))}
+                    {Object.keys(planoCount).length === 0 && <p className="text-xs text-slate-400 text-center py-4">Nenhuma assinatura ativa.</p>}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
-              <div className="text-sm font-semibold text-slate-800 mb-1">Acessos Diários</div>
-              <div className="text-xs text-slate-400 mb-4">Últimos 7 dias</div>
-              <ResponsiveContainer width="100%" height={160}>
-                <BarChart data={acessosData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0", background: "white" }} formatter={(v: number) => [v, "Acessos"]} />
-                  <Bar dataKey="acessos" fill="#6578c4" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="text-sm font-semibold text-slate-800 mb-1">Últimos Alunos Cadastrados</div>
+              <div className="text-xs text-slate-400 mb-4">Mais recentes na plataforma</div>
+              {assRealData.length === 0
+                ? <p className="text-sm text-slate-400 text-center py-6">Nenhum aluno cadastrado ainda.</p>
+                : <div className="space-y-2">{assRealData.slice(0, 5).map((a) => (
+                    <div key={a.id} className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-0">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 flex-shrink-0">
+                        {(a.usuarios?.nome ?? "?").split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-slate-700 truncate">{a.usuarios?.nome ?? "—"}</div>
+                        <div className="text-[11px] text-slate-400 truncate">{a.usuarios?.email ?? "—"}</div>
+                      </div>
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 capitalize">{a.planos?.nome ?? "—"}</span>
+                    </div>
+                  ))}</div>
+              }
             </div>
 
             <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
-              <div className="text-sm font-semibold text-slate-800 mb-4">Atividade Recente</div>
-              <div className="space-y-3 fx-stagger-fast">
-                {atividadeRecente.map((a, i) => {
-                  const isPos = a.tipo === "assinatura" || a.tipo === "parceria";
-                  return (
-                    <div key={i} className="flex items-start gap-2.5">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${isPos ? "bg-emerald-50" : "bg-rose-50"}`}>
-                        {a.tipo === "assinatura" && <UserCheck className="w-3.5 h-3.5 text-emerald-600" strokeWidth={1.5} />}
-                        {a.tipo === "parceria" && <Handshake className="w-3.5 h-3.5 text-emerald-600" strokeWidth={1.5} />}
-                        {a.tipo === "cancelamento" && <AlertCircle className="w-3.5 h-3.5 text-rose-600" strokeWidth={1.5} />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-slate-700 leading-snug">{a.texto}</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">{a.tempo}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <div className="text-sm font-semibold text-slate-800 mb-4">Tickets de Suporte Recentes</div>
+              <p className="text-xs text-slate-400 text-center py-6">Acesse o painel de atendimento para ver os chamados abertos.</p>
             </div>
           </div>
         </div>
@@ -4708,9 +4583,9 @@ function AdminPage() {
 
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: "Ativos", v: assinaturasData.filter((a) => a.status === "Ativo").length, c: "text-emerald-700" },
-              { label: "Pausados", v: assinaturasData.filter((a) => a.status === "Pausado").length, c: "text-amber-700" },
-              { label: "Cancelados", v: assinaturasData.filter((a) => a.status === "Cancelado").length, c: "text-rose-700" },
+              { label: "Ativos", v: assRealData.filter((a) => a.status === "ativa").length, c: "text-emerald-700" },
+              { label: "Pausados", v: assRealData.filter((a) => a.status === "pendente").length, c: "text-amber-700" },
+              { label: "Cancelados", v: assRealData.filter((a) => a.status === "cancelada" || a.status === "expirada").length, c: "text-rose-700" },
             ].map((k) => (
               <div key={k.label} className="rounded-xl border border-slate-200/80 bg-white/70 p-4 text-center">
                 <div className={`text-2xl font-bold mb-1 ${k.c}`}>{k.v}</div>
@@ -4784,89 +4659,20 @@ function AdminPage() {
       {tab === "receita" && (
         <div className="space-y-5 fx-fade">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard label="Receita Mai/26" value="R$ 31.200" sub="+13% vs Abr" icon={DollarSign} trend="+13%" color="emerald" />
-            <StatCard label="MRR Acumulado" value="R$ 123.210" sub="Jan–Mai 2026" icon={TrendingUp} color="blue" />
-            <StatCard label="Ticket Médio" value="R$ 247" sub="Premium + Pro" icon={CreditCard} color="slate" />
+            <StatCard label="Receita Mensal Recorrente" value={`R$ ${receitaMes.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} sub="baseado em assinaturas ativas" icon={DollarSign} color="emerald" />
+            <StatCard label="Assinantes Ativos" value={String(totalAtivos)} sub="planos vigentes" icon={UserCheck} color="blue" />
+            <StatCard label="Total de Alunos" value={String(metricas?.totalAlunos ?? 0)} sub="cadastrados" icon={Users} color="slate" />
           </div>
-
-          <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
-            <div className="text-sm font-semibold text-slate-800 mb-1">Evolução de Receita &amp; Assinantes</div>
-            <div className="text-xs text-slate-400 mb-4">Jan – Mai 2026</div>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={receitaData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                <YAxis yAxisId="left" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0", background: "white" }} />
-                <Line yAxisId="left" type="monotone" dataKey="receita" stroke="#0a0a3a" strokeWidth={2.5} dot={{ r: 4, fill: "#0a0a3a" }} name="Receita (R$)" />
-                <Line yAxisId="right" type="monotone" dataKey="assinaturas" stroke="#6578c4" strokeWidth={2} dot={{ r: 4, fill: "#6578c4" }} strokeDasharray="5 3" name="Assinantes" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <div className="grid grid-cols-5 gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-              <div>Mês</div><div>Receita</div><div>Assinantes</div><div>Variação</div><div>Status</div>
-            </div>
-            <div className="divide-y divide-slate-100 fx-stagger-fast">
-              {[...receitaData].reverse().map((r, i) => {
-                const prev = receitaData[receitaData.length - 2 - i];
-                const pct = prev ? (((r.receita - prev.receita) / prev.receita) * 100).toFixed(1) : null;
-                return (
-                  <div key={r.mes} className="grid grid-cols-5 gap-4 px-5 py-3.5 items-center hover:bg-slate-50/60 transition-colors">
-                    <div className="text-sm font-medium text-slate-700">{r.mes}/26</div>
-                    <div className="text-sm font-semibold text-slate-800">R$ {r.receita.toLocaleString("pt-BR")}</div>
-                    <div className="text-sm text-slate-600">{r.assinaturas}</div>
-                    <div className={`text-sm font-medium ${pct && Number(pct) > 0 ? "text-emerald-600" : "text-slate-400"}`}>{pct ? `+${pct}%` : "—"}</div>
-                    <div><span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${i === 0 ? "bg-[#6578c4]/10 text-[#5568b3] border border-[#6578c4]/30" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>{i === 0 ? "Atual" : "Concluído"}</span></div>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-6 text-center text-slate-400 text-sm">
+            <TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-30" />
+            Gráficos históricos serão gerados automaticamente conforme a plataforma acumular dados de assinaturas.
           </div>
         </div>
       )}
 
       {/* PARCERIAS */}
       {tab === "parcerias" && (
-        <div className="space-y-4 fx-fade">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Parceiros Ativos" value={String(parceirosAdmin.filter((p) => p.status === "Ativo").length)} sub="instituições" icon={Building2} color="blue" />
-            <StatCard label="Vagas Totais" value={String(parceirosAdmin.reduce((acc, p) => acc + p.vagas, 0))} sub="assentos institucionais" icon={Users} color="emerald" />
-            <StatCard label="Receita Parcerias" value={`R$ ${parceirosAdmin.reduce((acc, p) => acc + p.totalPago, 0).toLocaleString("pt-BR")}`} sub="acumulado" icon={DollarSign} color="amber" />
-            <StatCard label="Em Negociação" value={String(parceirosAdmin.filter((p) => p.status === "Em Negociação").length)} sub="propostas abertas" icon={RefreshCw} color="slate" />
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-              <div className="col-span-3">Instituição</div><div className="col-span-2">Tipo</div><div className="col-span-2">Plano · Vagas</div><div className="col-span-2">Receita</div><div className="col-span-2">Desde</div><div className="col-span-1">Status</div>
-            </div>
-            <div className="divide-y divide-slate-100 fx-stagger-fast">
-              {parceirosAdmin.map((p) => (
-                <div key={p.id} className="px-5 py-4 hover:bg-slate-50/60 transition-colors sm:grid sm:grid-cols-12 sm:gap-4 sm:items-center flex flex-col gap-1.5">
-                  <div className="sm:col-span-3"><div className="text-sm font-semibold text-slate-800">{p.nome}</div><div className="text-[11px] text-slate-400">{p.cidade}</div></div>
-                  <div className="sm:col-span-2 text-xs text-slate-500">{p.tipo}</div>
-                  <div className="sm:col-span-2"><span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full mr-1.5 ${planoBadge(p.plano)}`}>{p.plano}</span><span className="text-xs text-slate-500">{p.vagas} vagas</span></div>
-                  <div className="sm:col-span-2 text-sm font-semibold text-slate-700">{p.totalPago > 0 ? `R$ ${p.totalPago.toLocaleString("pt-BR")}` : "—"}</div>
-                  <div className="sm:col-span-2 text-xs text-slate-500">{p.inicio}</div>
-                  <div className="sm:col-span-1"><span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusBadge(p.status)}`}>{p.status}</span></div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5">
-            <div className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2"><PlusCircle className="w-4 h-4 text-[#6578c4]" strokeWidth={1.5} /> Nova Parceria</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {["Nome da Instituição", "Tipo", "Cidade / Estado", "E-mail de Contato", "Vagas"].map((lbl) => (
-                <div key={lbl}><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">{lbl}</label><input type={lbl === "Vagas" ? "number" : "text"} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white" placeholder={lbl} /></div>
-              ))}
-              <div><label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1 block">Plano</label><select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-slate-400"><option>Pro</option><option>Premium</option><option>Negociar</option></select></div>
-            </div>
-            <button className="mt-4 flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> Salvar Parceria</button>
-          </div>
-        </div>
+        <AdminParceriasTab />
       )}
 
     </div>
@@ -5825,6 +5631,31 @@ const perfilInicial = {
   avatar: "",
 };
 
+function PerfilStats({ usuarioId }: { usuarioId: string | null }) {
+  const { data: certs } = useSupabaseQuery(
+    () => usuarioId ? certificadosApi.getCertificadosUsuario(usuarioId) : Promise.resolve({ data: [], error: null }),
+    [usuarioId]
+  );
+  const { data: progresso } = useSupabaseQuery(
+    () => usuarioId ? cursosApi.getProgressoUsuario(usuarioId) : Promise.resolve({ data: [], error: null }),
+    [usuarioId]
+  );
+  const totalCerts = (certs as unknown[])?.length ?? 0;
+  const totalAulas = ((progresso as unknown[]) ?? []).filter((p: unknown) => (p as { concluida?: boolean }).concluida).length;
+  return (
+    <div className="grid grid-cols-2 gap-3 fx-stagger-grid">
+      <div className="border rounded-2xl p-4 text-center" style={{ background: "#f9f3dd", borderColor: "rgba(101,120,196,0.15)" }}>
+        <p className="text-2xl font-bold text-[#6578c4]">{totalAulas}</p>
+        <p className="text-[11px] text-slate-500 mt-0.5">Aulas concluídas</p>
+      </div>
+      <div className="border rounded-2xl p-4 text-center" style={{ background: "rgba(201,169,97,0.10)", borderColor: "rgba(201,169,97,0.25)" }}>
+        <p className="text-2xl font-bold" style={{ color: "#8a6210" }}>{totalCerts}</p>
+        <p className="text-[11px] text-slate-500 mt-0.5">Certificados</p>
+      </div>
+    </div>
+  );
+}
+
 function PerfilField({ label, value, field, editando, rascunho, onChange, multiline = false }: {
   label: string; value: string; field: string; editando: boolean;
   rascunho: Record<string, string>; onChange: (f: string, v: string) => void; multiline?: boolean;
@@ -6000,16 +5831,7 @@ function PerfilPage({ fotoUrl, bannerUrl, onUpdateFoto, onUpdateBanner }: {
       </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-2 gap-3 fx-stagger-grid">
-        <div className="border rounded-2xl p-4 text-center" style={{ background: "#f9f3dd", borderColor: "rgba(101,120,196,0.15)" }}>
-          <p className="text-2xl font-bold text-[#6578c4]">7</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">Cursos concluídos</p>
-        </div>
-        <div className="border rounded-2xl p-4 text-center" style={{ background: "rgba(201,169,97,0.10)", borderColor: "rgba(201,169,97,0.25)" }}>
-          <p className="text-2xl font-bold" style={{ color: "#8a6210" }}>4</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">Certificados</p>
-        </div>
-      </div>
+      <PerfilStats usuarioId={usuario?.id ?? null} />
 
       {/* Editable fields */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 space-y-4 shadow-sm">
@@ -6027,12 +5849,8 @@ function PerfilPage({ fotoUrl, bannerUrl, onUpdateFoto, onUpdateBanner }: {
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-3">Conquistas</h3>
         <div className="flex flex-wrap gap-2 fx-stagger-fast">
-          {[
-            { label: "Primeiro Curso", color: "bg-[#6578c4]/15 text-[#5568b3]" },
-            { label: "5 Certificados", color: "bg-emerald-100 text-emerald-700" },
-            { label: "Metodólogo", color: "bg-indigo-100 text-indigo-700" },
-            { label: "Pesquisador Ativo", color: "bg-amber-100 text-amber-700" },
-          ].map(({ label, color }) => (
+          <p className="text-xs text-slate-400">Conquistas serão desbloqueadas conforme você avança nos cursos!</p>
+          {([] as { label: string; color: string }[]).map(({ label, color }) => (
             <span key={label} className={`${color} text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1`}>
               <BadgeCheck className="w-3 h-3" /> {label}
             </span>
