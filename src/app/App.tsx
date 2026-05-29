@@ -49,6 +49,44 @@ function WorkshopSymbol({ className = "w-8 h-8" }: { className?: string }) {
     </svg>
   );
 }
+// ─── BRAND ICONS DA PASTA MODELOSITE ───────────────────────────────────────
+function BrandIconComunidade({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 936.9 888.95" className={className} xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="525.31" width="237.42" height="363.64" fill="currentColor"/>
+      <circle cx="120.8" cy="401.12" r="92.4" fill="currentColor"/>
+      <rect x="699.48" y="525.31" width="237.42" height="363.64" fill="currentColor"/>
+      <circle cx="799.5" cy="401.12" r="92.4" fill="currentColor"/>
+      <rect x="289.42" y="331.83" width="363.75" height="557.12" fill="currentColor" opacity="0.7"/>
+      <circle cx="460.15" cy="141.56" r="141.56" fill="currentColor" opacity="0.7"/>
+    </svg>
+  );
+}
+function BrandIconDocumento({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 594.95 736.61" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M338.8,256.16V0H0v736.61h594.95v-480.45h-256.15ZM60.2,303.37h417.88v73.19H60.2v-73.19ZM60.2,442.66h314v73.19H60.2v-73.19ZM487.53,648.06H60.2v-73.18h427.33v73.18Z" fill="currentColor"/>
+    </svg>
+  );
+}
+function BrandIconConteudo({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 837.93 552.75" className={className} xmlns="http://www.w3.org/2000/svg">
+      <rect x="119.7" y="0" width="619.65" height="126.75" fill="currentColor"/>
+      <rect x="119.7" y="426.01" width="619.65" height="126.75" fill="currentColor"/>
+      <rect x="0" y="188.92" width="837.93" height="171.4" fill="currentColor" opacity="0.7"/>
+    </svg>
+  );
+}
+function BrandIconCiencia({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 712.92 712.92" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M665.83,16.5c-64.86-59.03-255.95,45.34-426.82,233.09C68.16,437.34-17.78,637.41,47.09,696.42c64.86,59.03,255.95-45.33,426.82-233.08,170.86-187.76,256.79-387.82,191.93-446.84ZM411.57,427.26c-112.32,123.42-233.29,196.25-270.2,162.67-36.9-33.58,24.23-160.86,136.56-284.29,112.32-123.42,233.29-196.26,270.19-162.68,36.91,33.58-24.23,160.87-136.55,284.3Z" fill="currentColor"/>
+      <path d="M696.42,665.83c59.03-64.86-45.34-255.95-233.09-426.82C275.58,68.16,75.51-17.78,16.5,47.09c-59.03,64.86,45.33,255.95,233.08,426.82,187.76,170.86,387.82,256.79,446.84,191.93ZM285.66,411.57c-123.42-112.32-196.25-233.29-162.67-270.2,33.58-36.9,160.86,24.23,284.29,136.56,123.42,112.32,196.26,233.29,162.68,270.19-33.58,36.91-160.87-24.23-284.3-136.55Z" fill="currentColor" opacity="0.7"/>
+      <circle cx="356.46" cy="356.46" r="41.57" fill="currentColor"/>
+    </svg>
+  );
+}
 import {
   BookOpen,
   Award,
@@ -3805,10 +3843,10 @@ function EditorPage() {
   const [feedbackMsg, setFeedbackMsg] = useState<{ tipo: "ok" | "erro"; texto: string } | null>(null);
 
   // ── Estado dos formulários ──
-  const [cursoForm, setCursoForm] = useState({ titulo: "", descricao: "", nivel: "Iniciante", plano_minimo: "essencial" as "essencial" | "consultoria" });
-  const [gptForm, setGptForm] = useState({ titulo: "", descricao: "", url: "", categoria: "" });
-  const [promptForm, setPromptForm] = useState({ titulo: "", descricao: "", conteudo: "", categoria: "" });
-  const [livroForm, setLivroForm] = useState({ titulo: "", area: "" });
+  const [cursoForm, setCursoForm] = useState({ titulo: "", descricao: "", nivel: "Iniciante", plano_minimo: "essencial" as "essencial" | "consultoria", publicado: true });
+  const [gptForm, setGptForm] = useState({ titulo: "", descricao: "", url: "", categoria: "", publicado: true });
+  const [promptForm, setPromptForm] = useState({ titulo: "", descricao: "", conteudo: "", categoria: "", publicado: true });
+  const [livroForm, setLivroForm] = useState({ titulo: "", area: "", publicado: true });
   const [liveForm, setLiveForm] = useState({
     titulo: "", descricao: "", data_inicio: "", duracao_min: 90,
     url_acesso: "", url_gravacao: "", plano_minimo: "essencial" as "essencial" | "consultoria",
@@ -3829,11 +3867,12 @@ function EditorPage() {
       descricao: cursoForm.descricao || null,
       nivel: cursoForm.nivel as "Iniciante" | "Intermediário" | "Avançado",
       plano_minimo,
+      publicado: cursoForm.publicado,
     });
     setSalvando(false);
-    if (error) { mostrarFeedback("erro", "Erro ao salvar curso."); return; }
+    if (error) { mostrarFeedback("erro", `Erro ao salvar curso: ${error.message}`); return; }
     mostrarFeedback("ok", "Curso salvo com sucesso!");
-    setCursoForm({ titulo: "", descricao: "", nivel: "Iniciante", plano_minimo: "essencial" });
+    setCursoForm({ titulo: "", descricao: "", nivel: "Iniciante", plano_minimo: "essencial", publicado: true });
   };
 
   const salvarGPT = async () => {
@@ -3846,11 +3885,12 @@ function EditorPage() {
       url: gptForm.url || null,
       categoria: gptForm.categoria || catsCursoPrimeiroItem(catsGPT),
       plano_minimo,
+      publicado: gptForm.publicado,
     });
     setSalvando(false);
-    if (error) { mostrarFeedback("erro", "Erro ao salvar GPT."); return; }
+    if (error) { mostrarFeedback("erro", `Erro ao salvar GPT: ${error.message}`); return; }
     mostrarFeedback("ok", "GPT salvo com sucesso!");
-    setGptForm({ titulo: "", descricao: "", url: "", categoria: "" });
+    setGptForm({ titulo: "", descricao: "", url: "", categoria: "", publicado: true });
   };
 
   const salvarPrompt = async () => {
@@ -3861,11 +3901,12 @@ function EditorPage() {
       descricao: promptForm.descricao || null,
       conteudo: promptForm.conteudo,
       categoria: promptForm.categoria || catsCursoPrimeiroItem(catsPrompt),
+      publicado: promptForm.publicado,
     });
     setSalvando(false);
-    if (error) { mostrarFeedback("erro", "Erro ao salvar prompt."); return; }
+    if (error) { mostrarFeedback("erro", `Erro ao salvar prompt: ${error.message}`); return; }
     mostrarFeedback("ok", "Prompt salvo com sucesso!");
-    setPromptForm({ titulo: "", descricao: "", conteudo: "", categoria: "" });
+    setPromptForm({ titulo: "", descricao: "", conteudo: "", categoria: "", publicado: true });
   };
 
   const salvarLivro = async () => {
@@ -3874,11 +3915,12 @@ function EditorPage() {
     const { error } = await livrosApi.createLivro({
       titulo: livroForm.titulo,
       area: livroForm.area || null,
+      publicado: livroForm.publicado,
     });
     setSalvando(false);
-    if (error) { mostrarFeedback("erro", "Erro ao salvar livro."); return; }
+    if (error) { mostrarFeedback("erro", `Erro ao salvar livro: ${error.message}`); return; }
     mostrarFeedback("ok", "Livro salvo com sucesso!");
-    setLivroForm({ titulo: "", area: "" });
+    setLivroForm({ titulo: "", area: "", publicado: true });
   };
 
   const salvarLive = async () => {
@@ -4016,7 +4058,11 @@ function EditorPage() {
               {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
             </p>
           )}
-          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="pub-curso" checked={cursoForm.publicado} onChange={(e) => setCursoForm((f) => ({ ...f, publicado: e.target.checked }))} className="w-4 h-4 accent-[#6578c4]" />
+              <label htmlFor="pub-curso" className="text-sm text-slate-600 font-medium">Publicar para alunos</label>
+            </div>
             <button onClick={salvarCurso} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar Curso"}</button>
           </div>
         </div>
@@ -4061,7 +4107,11 @@ function EditorPage() {
               {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
             </p>
           )}
-          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="pub-gpt" checked={gptForm.publicado} onChange={(e) => setGptForm((f) => ({ ...f, publicado: e.target.checked }))} className="w-4 h-4 accent-[#6578c4]" />
+              <label htmlFor="pub-gpt" className="text-sm text-slate-600 font-medium">Publicar para alunos</label>
+            </div>
             <button onClick={salvarGPT} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar GPT"}</button>
           </div>
         </div>
@@ -4103,7 +4153,11 @@ function EditorPage() {
               {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
             </p>
           )}
-          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="pub-prompt" checked={promptForm.publicado} onChange={(e) => setPromptForm((f) => ({ ...f, publicado: e.target.checked }))} className="w-4 h-4 accent-[#6578c4]" />
+              <label htmlFor="pub-prompt" className="text-sm text-slate-600 font-medium">Publicar para alunos</label>
+            </div>
             <button onClick={salvarPrompt} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar Prompt"}</button>
           </div>
         </div>
@@ -4139,7 +4193,11 @@ function EditorPage() {
               {feedbackMsg.tipo === "ok" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />} {feedbackMsg.texto}
             </p>
           )}
-          <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="pub-livro" checked={livroForm.publicado} onChange={(e) => setLivroForm((f) => ({ ...f, publicado: e.target.checked }))} className="w-4 h-4 accent-[#6578c4]" />
+              <label htmlFor="pub-livro" className="text-sm text-slate-600 font-medium">Publicar para alunos</label>
+            </div>
             <button onClick={salvarLivro} disabled={salvando} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: "#0a0a3a" }}><Save className="w-4 h-4" /> {salvando ? "Salvando..." : "Salvar Livro"}</button>
           </div>
         </div>
@@ -4216,12 +4274,13 @@ function EditorPage() {
 // ─── LIVES PAGE ────────────────────────────────────────────────────────────
 
 function LivesPage() {
-  const { data: lives, loading } = useSupabaseQuery(() => livesApi.getLives(), []);
+  const { data: lives, loading, error } = useSupabaseQuery(() => livesApi.getLives(), []);
 
   const agora = new Date();
-  const proximas = (lives ?? []).filter((l) => l.status !== "encerrada" && new Date(l.data_inicio) >= agora);
-  const gravacoes = (lives ?? []).filter((l) => l.status === "encerrada" && l.url_gravacao);
-  const aoVivo = (lives ?? []).find((l) => l.status === "ao_vivo");
+  const livesLista = (lives ?? []);
+  const proximas = livesLista.filter((l) => l.status !== "encerrada" && new Date(l.data_inicio) >= agora);
+  const gravacoes = livesLista.filter((l) => l.status === "encerrada" && l.url_gravacao);
+  const aoVivo = livesLista.find((l) => l.status === "ao_vivo");
 
   function fmtData(iso: string) {
     return new Date(iso).toLocaleString("pt-BR", {
@@ -4239,6 +4298,16 @@ function LivesPage() {
   if (loading) return (
     <div className="flex justify-center items-center h-64">
       <RefreshCw className="w-6 h-6 text-[#6578c4] animate-spin" />
+    </div>
+  );
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center h-64 gap-4 text-slate-400">
+      <Video className="w-10 h-10 opacity-30" />
+      <div className="text-center">
+        <p className="text-sm font-medium">Módulo de lives ainda não configurado.</p>
+        <p className="text-xs mt-1">Execute a migration <code className="bg-slate-100 px-1 rounded text-slate-600">006_lives.sql</code> no Supabase para ativar.</p>
+      </div>
     </div>
   );
 
@@ -4844,22 +4913,12 @@ function AssinaturaPage() {
     : "—";
   const preco = assinatura?.planos?.preco_mensal
     ? `R$ ${Number(assinatura.planos.preco_mensal).toFixed(2).replace(".", ",")}`
-    : planoAtual === "consultoria" ? "R$ 99,90" : "R$ 49,90";
+    : "—";
   const planoBanner = planoAtual === "consultoria"
     ? { nome: "Consultoria Individual", preco, renovacao, cor: "from-[#0a0a3a] to-[#6578c4]" }
     : { nome: "Plano Essencial", preco, renovacao, cor: "from-[#0a0a3a] to-slate-800" };
 
-  const historicoEssencial = [
-    { data: "15/05/2025", valor: "R$ 97,00", status: "Pago" },
-    { data: "15/04/2025", valor: "R$ 97,00", status: "Pago" },
-    { data: "15/03/2025", valor: "R$ 97,00", status: "Pago" },
-  ];
-  const historicoConsultoria = [
-    { data: "15/05/2025", valor: "R$ 197,00", status: "Pago" },
-    { data: "15/04/2025", valor: "R$ 197,00", status: "Pago" },
-    { data: "15/03/2025", valor: "R$ 197,00", status: "Pago" },
-  ];
-  const historico = planoAtual === "consultoria" ? historicoConsultoria : historicoEssencial;
+  const historico: { data: string; valor: string; status: string }[] = [];
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -4888,8 +4947,8 @@ function AssinaturaPage() {
             <CreditCard className="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-800">Cartão de crédito •••• 4321</p>
-            <p className="text-xs text-slate-400">Vence em 08/2027</p>
+            <p className="text-sm font-semibold text-slate-800">Pagamento via Stripe</p>
+            <p className="text-xs text-slate-400">Gerencie seu método de pagamento abaixo</p>
           </div>
         </div>
         <button onClick={abrirPortalStripe} disabled={abrindoPortal} className="text-xs font-semibold text-[#6578c4] hover:text-[#5568b3] transition-colors disabled:opacity-50">
@@ -4906,7 +4965,7 @@ function AssinaturaPage() {
           </div>
           <div className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full" style={{ background: "rgba(201,169,97,0.25)", color: "#c9a961", border: "1px solid rgba(201,169,97,0.35)" }}>Upgrade disponível</div>
           <p className="text-xs font-semibold uppercase tracking-wider text-[#c9a961] mb-1">Mentoria Individual</p>
-          <p className="text-3xl font-bold mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>R$ 197<span className="text-sm font-normal text-[#c5cdf0]">/mês</span></p>
+          <p className="text-3xl font-bold mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Mentoria Individual<span className="text-sm font-normal text-[#c5cdf0] ml-2">— Acesso exclusivo</span></p>
           <p className="text-sm text-[#c5cdf0] mb-5">Tudo que você já tem, mais acesso direto e personalizado com a Dra. Sandri.</p>
           <div className="space-y-2.5 mb-6">
             {beneficiosExtras.map(({ texto, icon: Icon }) => (
@@ -5025,12 +5084,12 @@ function ConsultoriaPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "3 GPTs", icon: Bot },
-              { label: "4 Aulas", icon: CalendarDays },
-              { label: "3 Prompts", icon: Sparkles },
-            ].map(({ label, icon: Icon }) => (
-              <div key={label} className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold" style={{ background: "rgba(249,243,221,0.12)", border: "1px solid rgba(249,243,221,0.18)" }}>
-                <Icon className="w-3.5 h-3.5" /> {label}
+              { label: `${consultoriaGPTs.length || "GPTs"}`, icon: Bot, suffix: consultoriaGPTs.length > 0 ? " GPTs" : " GPTs exclusivos" },
+              { label: `${consultoriaAulas.length || "Aulas"}`, icon: CalendarDays, suffix: consultoriaAulas.length > 0 ? " Aulas" : " Aulas individuais" },
+              { label: `${consultoriaPrompts.length || "Prompts"}`, icon: Sparkles, suffix: consultoriaPrompts.length > 0 ? " Prompts" : " Prompts exclusivos" },
+            ].map(({ label, icon: Icon, suffix }) => (
+              <div key={suffix} className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold" style={{ background: "rgba(249,243,221,0.12)", border: "1px solid rgba(249,243,221,0.18)" }}>
+                <Icon className="w-3.5 h-3.5" /> {label}{suffix}
               </div>
             ))}
           </div>
@@ -5231,29 +5290,18 @@ type Page =
 
 const navItems = [
   { section: "Menu Principal" },
-  {
-    id: "plataforma",
-    label: "Plataforma de Aulas",
-    icon: BookOpen,
-  },
-  {
-    id: "parceria",
-    label: "Parceria Institucional",
-    icon: Handshake,
-  },
-  { id: "livros", label: "Livros Metodológicos", icon: BookMarked },
+  { id: "plataforma", label: "Plataforma de Aulas", icon: BrandSearchIcon },
+  { id: "lives", label: "Aulas ao Vivo", icon: Video },
+  { id: "consultoria", label: "Consultoria", icon: MentoriaSymbol },
+  { divider: true },
+  { id: "gpts", label: "GPTs", icon: BrandIconCiencia },
+  { id: "biblioteca", label: "Biblioteca de Prompts", icon: BrandIconConteudo },
+  { id: "livros", label: "Livros", icon: BrandIconDocumento },
+  { id: "comunidade", label: "Comunidade", icon: BrandIconComunidade },
+  { divider: true },
   { id: "certificados", label: "Certificados", icon: Award },
   { id: "atendimento", label: "Atendimento", icon: Headphones },
-  { id: "consultoria", label: "Consultoria", icon: GraduationCap },
-  { divider: true },
-  { id: "gpts", label: "GPTs", icon: Sparkles },
-  {
-    id: "biblioteca",
-    label: "Biblioteca de Prompts",
-    icon: Library,
-  },
-  { id: "comunidade", label: "Comunidade", icon: Users },
-  { id: "lives", label: "Aulas ao Vivo", icon: Video },
+  { id: "parceria", label: "Parceria Institucional", icon: Handshake },
   { divider: true },
   { id: "admin", label: "Painel Admin", icon: ShieldCheck },
   { id: "editor", label: "Editor de Conteúdo", icon: Edit3 },
